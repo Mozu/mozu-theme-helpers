@@ -1,0 +1,12 @@
+{
+  "about": {
+    "name": "Your Theme",
+    "extends": "core6",
+    "isDesktop": true,
+    "isMobile": true,
+    "version": "0.1.0"
+  },
+  "settings": {},
+  "pageTypes": [],
+  "widgets": []
+}

@@ -1,0 +1,37 @@
+{
+  "name": "thmaa",
+  "version": "0.1.0",
+  "author": "Volusion Inc.",
+  "contributors": [
+    {
+      "name": "James Zetlen",
+      "email": "james_zetlen@volusion.com"
+    }
+  ],
+  "bin": {
+    "thmaa": "./bin/thmaa"
+  },
+  "scripts": {
+    "test": "node maketest.js"
+  },
+  "main": "./thmaa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mozu/thmaa"
+  },
+  "bugs": {
+    "url": "https://github.com/mozu/thmaa/issues"
+  },
+  "keywords": [
+    "mozu",
+    "hypr",
+    "themes"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "mozu-core-theme": "git+https://github.com/mozu/core-theme.git",
+    "rimraf": "^2.2.8"
+  },
+  "preferGlobal": true,
+  "license": "MIT"
+}
