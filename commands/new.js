@@ -13,7 +13,7 @@ module.exports = function(argv, cb) {
   if (!themeName) {
     die("Please supply a directory name for your new theme.");
   }
-  var newThemeDir = path.resolve(process.cwd, themeName);
+  var newThemeDir = path.resolve(process.cwd(), themeName);
   ncp(path.resolve(__dirname, '../resources/theme-template'), newThemeDir, function (err) {
     if (err) die(err.message);
 
