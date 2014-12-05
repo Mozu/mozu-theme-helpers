@@ -2,6 +2,8 @@ var path = require('path'),
     fs = require('fs'),
     rimraf = require('rimraf'),
 
+
+// add .inherited files to theme template
     ignore = [
       ".DS_Store",
       ".git",
@@ -42,4 +44,8 @@ var path = require('path'),
     console.log('writing .inherited file to ./' + path.relative('./',templatedir));
     fs.writeFileSync(path.resolve(templatedir, '.inherited'), fileList.join('\n'));
   }
-})(path.resolve('./node_modules/mozu-core-theme'), path.resolve('./resources/theme-template'));
+})(path.resolve(__dirname, '../node_modules/mozu-core-theme'), path.resolve(__dirname, './theme-template'));
+
+// copy usage txt into readme
+fs.writeFileSync(path.resolve(__dirname, '../README.md'), [fs.readFileSync(path.resolve(__dirname, './README.tpt.md'), 'utf-8'), fs.readFileSync(path.resolve(__dirname, './usage.txt'), 'utf-8'), '\n'].join("\n```\n"));
+console.log('wrote README.md');

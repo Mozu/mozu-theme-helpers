@@ -12,7 +12,7 @@
     "thmaa": "./bin/thmaa"
   },
   "scripts": {
-    "test": "node maketest.js"
+    "build": "node ./resources/build.js"
   },
   "main": "./thmaa",
   "repository": {

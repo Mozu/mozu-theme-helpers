@@ -14,6 +14,23 @@ npm install -g thmaa
 ```
 
 ## Usage
-```sh
-thmaa <subcommand>
 ```
+
+    new <dir> [base]              Create a new theme, based on Core by default.
+
+        --name                    Specify a unique package name.
+                                  (Defaults to directory name).
+
+        --friendly-name           Specify a display name for administrator.
+                                  (Defaults to directory name).
+
+    override <path>               Create an override, copying from base theme.
+
+        --force                   Force creation even if a file already exists.
+
+    check <path>                  Check if references are up to date.
+
+    update <path>                 Update references folder.
+
+```
+
