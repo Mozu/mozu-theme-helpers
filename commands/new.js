@@ -37,7 +37,7 @@ var newTheme = function(themeName, opts, cb) {
     shellOut('npm install', function(err){
       if (err) throw err;
       console.log("Installed node modules");
-      update(opts, function(err) {
+      update(newThemeDir, opts, function(err) {
         if (err) throw err;
         console.log("\nCreated new theme " + themeName + " in " + newThemeDir);
         cb();

@@ -25,6 +25,7 @@ build/Release
 node_modules
 resources/theme-template/references
 resources/theme-template/compiled
+*.zip
 
 # Users Environment Variables
 .lock-wscript

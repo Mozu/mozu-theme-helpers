@@ -2,10 +2,11 @@ var path = require('path'),
     fs = require('fs'),
     rimraf = require('rimraf'),
     shellOut = require('../utils/shell-out'),
-    getThemeDir = require('../utils/get-theme-dir')
+    getThemeDir = require('../utils/get-theme-dir'),
+    editThemeJson = require('../utils/edit-theme-json'),
     die = require('../utils/die');
 
-var coreVersions = require('./check').coreVersions.slice();
+var coreMajorVersions = require('./check').coreMajorVersions.slice();
 var update = function(dir, opts, cb) {
   if (!cb) {
     cb = opts;
@@ -18,7 +19,10 @@ var update = function(dir, opts, cb) {
   }
   shellOut('bower cache clean', function(err) {
     if (err) die('Cache clean failed: ' + err.message);
-    coreVersions.forEach(function(ver) {
+    if (!opts || !opts.all) {
+      coreMajorVersions = [editThemeJson.read(themeDir, 'theme.json').about.extends.replace(/core/i,'')];
+    }
+    coreMajorVersions.forEach(function(ver) {
       rimraf(path.resolve(themeDir, 'references', 'core' + ver), function(err) {
         if (err) die(err.message);
         var json = '';
@@ -27,8 +31,8 @@ var update = function(dir, opts, cb) {
           JSON.parse(json).filter(function(log) { return log.id === "resolved" }).forEach(function(log) {
             console.log("Your reference to Core Theme version " + ver + " is now at version " + log.message.split('#').pop());
           });
-          coreVersions = coreVersions.slice(1);
-          if (coreVersions.length === 0) cb();
+          coreMajorVersions = coreMajorVersions.slice(1);
+          if (coreMajorVersions.length === 0) cb();
         }, { stdio: 'pipe', cwd: themeDir });
         child.stderr.setEncoding('utf8')
         child.stderr.on('data', function(chunk) {
@@ -42,7 +46,9 @@ var update = function(dir, opts, cb) {
 update._doc = {
   args: '<path>',
   description: 'Update references folder.',
-  options: {}
+  options: {
+    "--all": "Download all versions of the Core theme instead of just the version this theme extends."
+  }
 }
 
 module.exports = update;

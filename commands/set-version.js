@@ -12,8 +12,8 @@ var setVersion = function(dir, version, opts, cb) {
     dir = process.cwd();
   }
   opts = opts || {};
-  if (opts['no-package']) toUpdate.shift();
-  if (opts['no-bower']) toUpdate.pop();
+  if (opts['no-package'] || (opts.package === false)) toUpdate.shift();
+  if (opts['no-bower'] || (opts.bower === false)) toUpdate.pop();
   var themeDir = getThemeDir(process.cwd());
   if (!themeDir) die("No theme detected. Cannot set version.");
   if (!version) die("Please supply a version string to set.");

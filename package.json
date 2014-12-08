@@ -35,8 +35,7 @@
     "ncp": "^1.0.1",
     "rimraf": "^2.2.8",
     "semver": "^4.1.0",
-    "zubat": "^0.2.7"
+    "zubat": "^0.3.0"
   },
-  "preferGlobal": true,
   "license": "MIT"
 }

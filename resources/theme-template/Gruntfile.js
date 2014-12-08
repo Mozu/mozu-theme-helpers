@@ -29,7 +29,7 @@ module.exports = function(grunt) {
     '*.png'
   ],
 
-versionCmd = 'git describe --tags --always'; // e.g. 'git describe --tags --always' or 'svn info'
+versionCmd = ''; // e.g. 'git describe --tags --always' or 'svn info'
 
 function getVersion(cb) {
   if (!versionCmd) return cb(null, '0.1.0');
@@ -38,7 +38,7 @@ function getVersion(cb) {
     cmd: cmd[0],
     args: cmd.slice(1)
   }, function(err, res) {
-    cb(err, res.stdout);
+    cb(err, res.stdout.replace(/^v/,''));
   });
 }
 
@@ -88,6 +88,12 @@ grunt.initConfig({
       check: {},
       update: {},
       compile: {},
+      quickcompile: {
+        command: 'compile',
+        opts: {
+          'skipminification': true
+        }
+      },
       buildver: {
         command: 'set-version',
         params: getVersion,
@@ -168,7 +174,7 @@ grunt.initConfig({
     }
   });
 
-  grunt.registerTask('build', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:compile', 'thmaa:buildver', 'compress']);
+  grunt.registerTask('build', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:quickcompile', 'thmaa:buildver', 'compress']);
   grunt.registerTask('release', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:compile', 'thmaa:releasever', 'compress']);
   grunt.registerTask('default', ['build']);
 };
