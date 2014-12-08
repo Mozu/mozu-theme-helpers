@@ -2,3 +2,7 @@
 
  - improved API to be compatible with grunt task
  - added set-version and compile tasks
+
+## 0.2.1 -- 2014-12-8
+
+ - fixed spacing discrepancy with documentation, added --forcewidth option to help

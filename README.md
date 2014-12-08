@@ -15,54 +15,60 @@ npm install -g thmaa
 
 ## Usage
 ```
-                                                                                                                                                     
-  Theme Helper for Mozu and Associated Assets                                                                                                        
-                                                                                                                                                     
-  If you don't supply a <path> to a command, thmaa will assume the current directory.                                                                
-                                                                                                                                                     
-  check <path>                                                          Check if references are up to date.
+                                                                                
+  Theme Helper for Mozu and Associated Assets                                   
+                                                                                
+  If you don't supply a <path> to a command, thmaa will assume the current directory.
+                                                                                
+  check <path>                        Check if references are up to date.
 
-  compile <path>                                                        Compile theme scripts, respecting inheritance.
-                                                                        
-    --ignore                                                            Speed up! Specify a pattern of files and directories to ignore when copy
-                                                                        ing, relative to root. Defaults to .git, node_modules
-                                                                        
-    --dest                                                              Specify a destination other than the default /compiled/scripts directory
-                                                                         of your theme.
-                                                                        
-    --verbose                                                           Talk a lot.
+  compile <path>                      Compile theme scripts, respecting inhe
+                                      ritance.                                      
+    --ignore                          Speed up! Specify a pattern of files a
+                                      nd directories to ignore when copying,
+                                       relative to root. Defaults to .git, n
+                                      ode_modules
+                                      
+    --dest                            Specify a destination other than the d
+                                      efault /compiled/scripts directory of 
+                                      your theme.
+                                      
+    --verbose                         Talk a lot.
 
-                                                                        
-    --quiet                                                             Don't talk at all.
-
-
-  help                                                                  Print this help
-                                                                        
-    --splash                                                            Display a fancy logo.
+                                      
+    --quiet                           Don't talk at all.
 
 
-  new <path>                                                            Create a new theme based on the Core theme.
-                                                                        
-    --name                                                              Specify a unique package name. (Defaults to directory name.)
+  help                                Print this help
+                                      
+    --splash                          Display a fancy logo.
 
-                                                                        
-    --friendly-name                                                     Specify a display name for SiteBuilder. (Defaults to directory name.)
+                                      
+    --forcewidth <n>                  Force display at a certain number of c
+                                      olumns. Defaults to terminal width.
+
+  new <path>                          Create a new theme based on the Core t
+                                      heme.                                      
+    --name                            Specify a unique package name. (Defaul
+                                      ts to directory name.)
+                                      
+    --friendly-name                   Specify a display name for SiteBuilder
+                                      . (Defaults to directory name.)
+
+  override <path>                     Create an override, copying from your 
+                                      base theme.                                      
+    --force                           Force overwrite if an override already
+                                       exists.
+
+  set-version <path> <version>        Set and synchronize the version number
+                                       across all config files.                                      
+    --no-package                      Do not update package.json.
+
+                                      
+    --no-bower                        Do not update bower.json.
 
 
-  override <path>                                                       Create an override, copying from your base theme.
-                                                                        
-    --force                                                             Force overwrite if an override already exists.
-
-
-  set-version <path> <version>                                          Set and synchronize the version number across all config files.
-                                                                        
-    --no-package                                                        Do not update package.json.
-
-                                                                        
-    --no-bower                                                          Do not update bower.json.
-
-
-  update <path>                                                         Update references folder.
+  update <path>                       Update references folder.
 
 
 ```

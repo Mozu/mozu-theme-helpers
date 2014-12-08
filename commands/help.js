@@ -27,8 +27,11 @@ var shortHeader = "\n  Theme Helper for Mozu and Associated Assets\n"
 var printHelp = function(opts, cb) {
   if (!opts) opts = {};
   var headerTxt = (opts.splash && termwidth >= 80 && termheight >= 30) ? fs.readFileSync(path.resolve(__dirname, '../resources/header.txt'), 'utf-8') : shortHeader,
-    usageTxt = fs.readFileSync(path.resolve(__dirname, '../resources/usage.txt'), 'utf-8'),
-    colwidth = Math.floor(termwidth/2)-2,
+    usageTxt = fs.readFileSync(path.resolve(__dirname, '../resources/usage.txt'), 'utf-8');
+
+  if (opts.forcewidth) termwidth = opts.forcewidth;
+
+  var colwidth = Math.floor(termwidth/2)-2,
     colWidthRE = new RegExp('.{1,' + colwidth + '}', 'g'),
     leftPad = pad("", colwidth),
     methodsText = fs.readdirSync(__dirname).map(function(cmdFile) {
@@ -71,7 +74,8 @@ printHelp._doc = {
   args: '',
   description: 'Print this help',
   options: {
-    "--splash": "Display a fancy logo."
+    "--splash": "Display a fancy logo.",
+    "--forcewidth <n>": "Force display at a certain number of columns. Defaults to terminal width."
   }
 };
 
