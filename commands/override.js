@@ -4,15 +4,15 @@ var path = require('path'),
     getThemeDir = require('../utils/get-theme-dir'),
     die = require('../utils/die');
 
-module.exports = function(argv, cb) {
-  var name = argv._[1];
-  if (!name) {
+module.exports = function(name, opts, cb) {
+  if (!cb || !name) {
     die("Please specify a file path to override from the base theme.");
   }
+  if (!opts) opts = {};
 
   var pathName = path.resolve(name);
 
-  if (fs.existsSync(pathName) && !argv.force) {
+  if (fs.existsSync(pathName) && !opts.force) {
     die("The file `" + name + "` already exists in your theme at `" + pathName + "`. Copying it again from the base theme would overwrite any changes you made!\nTo do this anyway, run again with the --force flag.")
   }
 

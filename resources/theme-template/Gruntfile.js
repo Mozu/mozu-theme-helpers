@@ -8,7 +8,6 @@ module.exports = function(grunt) {
   ],
     jsFiles = [
     'Gruntfile.js',
-    'build.js',
     'scripts/**/*.js'
   ],
     filesToArchive = [
@@ -31,6 +30,10 @@ module.exports = function(grunt) {
   ],
 
 versionCmd = ':'; // e.g. 'git describe --tags --always' or 'svn info'
+
+function getVersion(cb) {
+  grunt.util.spawn(versionCmd, cb);
+}
 
 grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -80,6 +83,9 @@ grunt.initConfig({
         }]
       }
     },
+    thmaa: {
+      check: {}
+    },
     watch: {
       json: {
         files: jsonFiles,
@@ -116,10 +122,51 @@ grunt.initConfig({
    'grunt-jsonlint',
    'grunt-contrib-jshint',
    'grunt-contrib-watch',
-   'grunt-contrib-compress'
+   'grunt-contrib-compress',
+   'grunt-zubat'
   ].forEach(grunt.loadNpmTasks);
 
-  grunt.loadTasks('./tasks/');
+
+  var gCommands = [
+    'new',
+    'override',
+    'update',
+    'check'
+  ],
+  thmaa = require('thmaa');
+  grunt.registerTask('thmaa', function() {
+    var done = this.async();
+    var target = this.target || this.args[0];
+    var args = this.data && this.data.params;
+    if (gCommands.indexOf(target) === -1) {
+      grunt.fail.warn('Unrecognized thmaa command `' + target + '`.');
+      return false;
+    }
+    switch(target) {
+      case "new":
+      case "override":
+        if (!(args && args.length > 0)) {
+          grunt.fail.warn('The thmaa command `' + target + '` requires at least one argument, or a function that takes a callback.')
+        }
+        break;
+    }
+    if (typeof args === "function") {
+      args(run);
+    } else {
+      run(null, args)
+    }
+    function run(err, params) {
+      if (err) {
+        grunt.fail.warn(err);
+        return false;
+      }
+      try {
+        thmaa.apply(this, [target].concat(params).concat([this.data && this.data.options, done]));
+      } catch(e) {
+        grunt.fail.warn(e.message);
+      }
+    }
+  });
 
   grunt.registerTask('build', ['jsonlint', 'jshint', 'checkreferences', 'zubat', 'setver:build', 'compress', 'setver:renamezip']);
   grunt.registerTask('release', ['jsonlint', 'jshint', 'zubat', 'setver:release', 'compress', 'setver:renamezip']);

@@ -8,17 +8,18 @@ var path = require('path'),
 
     coreVersions = [4,5,6],
 
-check = function(argv, cb) {
-  var themeDir = argv._[1] || getThemeDir(process.cwd()), themePath;
+check = function(dir, opts, cb) {
+  if (!cb) {
+    cb = opts;
+    opts = dir;
+    dir = process.cwd();
+  }
+  if (!opts) opts = {};
+  var themeDir = getThemeDir(dir);
   if (!themeDir) {
-    die("Please supply a theme directory whose references I should check.");
+    die("Not inside a theme directory. Please supply a theme directory whose references I should check.");
   }
-  themePath = path.resolve(process.cwd(), themeDir);
-  if (!fs.existsSync(themePath)) {
-    die("Theme directory " + themeDir + " not found.")
-  }
-
-  var themejson = JSON.parse(fs.readFileSync(path.resolve(themePath, 'theme.json'), 'utf-8'));
+  var themejson = JSON.parse(fs.readFileSync(path.resolve(themeDir, 'theme.json'), 'utf-8'));
   var activeVersion = coreVersions.filter(function(ver) {
     return themejson.about.extends.toLowerCase().trim() === "core" + ver;
   })[0];
@@ -52,7 +53,7 @@ check = function(argv, cb) {
       }
       vers = vers.slice(1);
       if (vers.length === 0) cb();
-    }, { stdio: 'pipe', cwd: themePath });
+    }, { stdio: 'pipe', cwd: themeDir });
     child.stdout.setEncoding('utf8')
     child.stdout.on('data', function(chunk) {
       json += chunk;

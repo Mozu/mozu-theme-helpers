@@ -1,6 +1,4 @@
 var die = require('./utils/die'),
-    argv = require('minimist')(process.argv.slice(2)),
-    command = argv._[0] || 'help',
 
     commands = [
       'help',
@@ -10,14 +8,12 @@ var die = require('./utils/die'),
       'check'
     ];
 
-module.exports = function() {
+module.exports = function(command) {
+
   if (commands.indexOf(command) === -1) {
     die("Unrecognized command `" + command + "`. Run `thmaa help` for a list of commands.");
   }
 
-  require('./commands/' + command)(argv, function(err) {
-    if (err) die(err.message);
-    process.exit(0);
-  });
+  require('./commands/' + command).apply(this, [].slice.call(arguments, 1));
 
-}
+};

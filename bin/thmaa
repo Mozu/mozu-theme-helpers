@@ -1,2 +1,25 @@
 #!/usr/bin/env node
-require('../thmaa')();
+
+var util = require('util'),
+    color = require('cli-color').redBright;
+
+var argv = require('minimist')(process.argv.slice(2)),
+    command = argv._[0] || (argv._[0] = 'help');
+
+function go() {
+  require('../thmaa').apply(this, argv._.concat([argv, function(err) {
+    if (err) throw err;
+    process.exit(0);
+  }]));
+}
+
+if (argv.debug) {
+  go();
+} else {
+  try {
+    go();
+  } catch(e) {
+    process.stderr.write(color(e.message) + '\n');
+    process.exit(1);
+  }
+}
