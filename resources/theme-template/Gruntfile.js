@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-var versionCmd = 'git describe --tags --always'; // e.g. 'git describe --tags --always' or 'svn info'
+var versionCmd = ''; // e.g. 'git describe --tags --always' or 'svn info'
 
 grunt.initConfig({
     jsonlint: {
