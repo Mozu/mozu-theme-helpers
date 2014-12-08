@@ -1,58 +1,21 @@
 module.exports = function(grunt) {
 
-  var jsonFiles = [
-    'theme.json',
-    'theme-ui.json',
-    'package.json',
-    'labels/*.json'
-  ],
-    jsFiles = [
-    'Gruntfile.js',
-    'scripts/**/*.js'
-  ],
-    filesToArchive = [
-    'compiled/**',
-    'labels/**',
-    'resources/**',
-    'scripts/**',
-    'stylesheets/**',
-    'templates/**',
-    'build.js',
-    'CHANGELOG.md',
-    'Gruntfile.js',
-    'LICENSE',
-    'package.json',
-    'README.md',
-    'theme.json',
-    'theme-ui.json',
-    '*.ico',
-    '*.png'
-  ],
-
-versionCmd = ''; // e.g. 'git describe --tags --always' or 'svn info'
-
-function getVersion(cb) {
-  if (!versionCmd) return cb(null, '0.1.0');
-  var cmd = versionCmd.split(' ');
-  grunt.util.spawn({
-    cmd: cmd[0],
-    args: cmd.slice(1)
-  }, function(err, res) {
-    cb(err, res.stdout.replace(/^v/,''));
-  });
-}
-
-var pkg = grunt.file.readJSON('package.json');
+var versionCmd = 'git describe --tags --always'; // e.g. 'git describe --tags --always' or 'svn info'
 
 grunt.initConfig({
-    pkg: pkg,
     jsonlint: {
       theme_json: {
-        src: jsonFiles
+        src: [
+          './*.json',
+          'labels/*.json'
+        ]
       }
     },
     jshint: {
-      theme_js: jsFiles,
+      theme_js: [
+        'Gruntfile.js',
+        'scripts/**/*.js'
+      ],
       options: {
         ignores: ['scripts/vendor/**/*.js'],
         undef: true,
@@ -75,11 +38,24 @@ grunt.initConfig({
     compress: {
       build: {
         options: {
-          archive: '<%= pkg.name %>-<%= pkg.version %>.zip',
+          archive: function() {
+            return pkg.name + '-' + (lastVersionGot || pkg.version) + '.zip';
+          },
           pretty: true
         },
         files: [{
-          src: filesToArchive,
+          src: [
+            'compiled/**',
+            'labels/**',
+            'resources/**',
+            'scripts/**',
+            'stylesheets/**',
+            'templates/**',
+            '*.js',
+            '*.json',
+            '*.ico',
+            '*.png'
+          ],
           dest: '/'
         }]
       }
@@ -109,19 +85,33 @@ grunt.initConfig({
     },
     watch: {
       json: {
-        files: jsonFiles,
+        files: '{<%= jsonlint.theme_json.src %>}',
         tasks: ['jsonlint']
       },
       javascript: {
-        files: jsFiles,
-        tasks: ['jshint','thmaa:compile']
+        files: '{<%= jshint.theme_js %>}',
+        tasks: ['jshint','thmaa:quickcompile']
       },
       compress: {
-        files: filesToArchive,
-        tasks: ['compress']
+        files: '{<%= compress.build.files[0].src %>}',
+        tasks: ['thmaa:check','compress']
       }
     }
   });
+
+  var lastVersionGot;
+  function getVersion(cb) {
+    if (!versionCmd) return cb(null, '0.1.0');
+    var cmd = versionCmd.split(' ');
+    grunt.util.spawn({
+      cmd: cmd[0],
+      args: cmd.slice(1)
+    }, function(err, res) {
+      cb(err, lastVersionGot = res.stdout.replace(/^v/,''));
+    });
+  }
+
+  var pkg = grunt.file.readJSON('package.json');
 
 // auto-load all package.json dependencies with names starting with 'grunt-'
   Object.keys(pkg.devDependencies)
