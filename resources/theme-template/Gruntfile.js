@@ -35,6 +35,29 @@ grunt.initConfig({
         }
       }
     },
+    thmaa: {
+      check: {},
+      update: {},
+      compile: {},
+      quickcompile: {
+        command: 'compile',
+        opts: {
+          'skipminification': true
+        }
+      },
+      buildver: {
+        command: 'set-version',
+        params: getVersion,
+        opts: {
+          'no-bower': true,
+          'no-package': true
+        }
+      },
+      releasever: {
+        command: 'set-version',
+        params: getVersion
+      }
+    },
     compress: {
       build: {
         options: {
@@ -58,29 +81,6 @@ grunt.initConfig({
           ],
           dest: '/'
         }]
-      }
-    },
-    thmaa: {
-      check: {},
-      update: {},
-      compile: {},
-      quickcompile: {
-        command: 'compile',
-        opts: {
-          'skipminification': true
-        }
-      },
-      buildver: {
-        command: 'set-version',
-        params: getVersion,
-        opts: {
-          'no-bower': true,
-          'no-package': true
-        }
-      },
-      releasever: {
-        command: 'set-version',
-        params: getVersion
       }
     },
     watch: {
