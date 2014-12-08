@@ -24,6 +24,7 @@ build/Release
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
 node_modules
 resources/theme-template/references
+resources/theme-template/compiled
 
 # Users Environment Variables
 .lock-wscript

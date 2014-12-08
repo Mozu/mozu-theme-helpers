@@ -1,6 +1,6 @@
 var path = require('path'),
     fs = require('fs'),
-    rimraf = require('rimraf'),
+    rimraf = require('rimraf');
 
 
 // add .inherited files to theme template
@@ -17,6 +17,7 @@ var path = require('path'),
       "core-thumb.png",
       "node_modules",
       "npm-shrinkwrap.json",
+      "tasks",
       "vendor"
     ].reduce(function(m, n) {
       m[n] = true;
@@ -47,5 +48,7 @@ var path = require('path'),
 })(path.resolve(__dirname, '../node_modules/mozu-core-theme'), path.resolve(__dirname, './theme-template'));
 
 // copy usage txt into readme
-fs.writeFileSync(path.resolve(__dirname, '../README.md'), [fs.readFileSync(path.resolve(__dirname, './README.tpt.md'), 'utf-8'), fs.readFileSync(path.resolve(__dirname, './usage.txt'), 'utf-8'), '\n'].join("\n```\n"));
-console.log('wrote README.md');
+require('../commands/help')({ 'no-tty': true }, function(err, txt) {
+  fs.writeFileSync(path.resolve(__dirname, '../README.md'), [fs.readFileSync(path.resolve(__dirname, './README.tpt.md'), 'utf-8'), txt, '\n'].join("\n```\n"));
+  console.log('wrote README.md');
+});

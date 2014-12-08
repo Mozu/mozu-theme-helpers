@@ -15,22 +15,55 @@ npm install -g thmaa
 
 ## Usage
 ```
+                                                                                                                                                     
+  Theme Helper for Mozu and Associated Assets                                                                                                        
+                                                                                                                                                     
+  If you don't supply a <path> to a command, thmaa will assume the current directory.                                                                
+                                                                                                                                                     
+  check <path>                                                          Check if references are up to date.
 
-    new <dir> [base]              Create a new theme, based on Core by default.
+  compile <path>                                                        Compile theme scripts, respecting inheritance.
+                                                                        
+    --ignore                                                            Speed up! Specify a pattern of files and directories to ignore when copy
+                                                                        ing, relative to root. Defaults to .git, node_modules
+                                                                        
+    --dest                                                              Specify a destination other than the default /compiled/scripts directory
+                                                                         of your theme.
+                                                                        
+    --verbose                                                           Talk a lot.
 
-        --name                    Specify a unique package name.
-                                  (Defaults to directory name).
+                                                                        
+    --quiet                                                             Don't talk at all.
 
-        --friendly-name           Specify a display name for administrator.
-                                  (Defaults to directory name).
 
-    override <path>               Create an override, copying from base theme.
+  help                                                                  Print this help
+                                                                        
+    --splash                                                            Display a fancy logo.
 
-        --force                   Force creation even if a file already exists.
 
-    check <path>                  Check if references are up to date.
+  new <path>                                                            Create a new theme based on the Core theme.
+                                                                        
+    --name                                                              Specify a unique package name. (Defaults to directory name.)
 
-    update <path>                 Update references folder.
+                                                                        
+    --friendly-name                                                     Specify a display name for SiteBuilder. (Defaults to directory name.)
+
+
+  override <path>                                                       Create an override, copying from your base theme.
+                                                                        
+    --force                                                             Force overwrite if an override already exists.
+
+
+  set-version <path> <version>                                          Set and synchronize the version number across all config files.
+                                                                        
+    --no-package                                                        Do not update package.json.
+
+                                                                        
+    --no-bower                                                          Do not update bower.json.
+
+
+  update <path>                                                         Update references folder.
+
 
 ```
 

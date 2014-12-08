@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var util = require('util'),
-    color = require('cli-color').redBright;
+    colors = require('colors');
 
 var argv = require('minimist')(process.argv.slice(2)),
     command = argv._[0] || (argv._[0] = 'help');
@@ -19,7 +19,7 @@ if (argv.debug) {
   try {
     go();
   } catch(e) {
-    process.stderr.write(color(e.message) + '\n');
+    process.stderr.write(e.message.red + '\n');
     process.exit(1);
   }
 }

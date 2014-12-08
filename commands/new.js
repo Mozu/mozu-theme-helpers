@@ -8,7 +8,7 @@ var path = require('path'),
 
 ncp.limit = 16;
 
-module.exports = function(themeName, opts, cb) {
+var newTheme = function(themeName, opts, cb) {
   if (!cb || !themeName) {
     die("Please supply a directory name for your new theme.");
   }
@@ -47,3 +47,14 @@ module.exports = function(themeName, opts, cb) {
   });
 
 };
+
+newTheme._doc = {
+  args: '<path>',
+  description: 'Create a new theme based on the Core theme.',
+  options: {
+    '--name': 'Specify a unique package name. (Defaults to directory name.)',
+    '--friendly-name': 'Specify a display name for SiteBuilder. (Defaults to directory name.)'
+  }
+}
+
+module.exports = newTheme;

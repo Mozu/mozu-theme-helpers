@@ -4,7 +4,7 @@
     "extends": "core6",
     "isDesktop": true,
     "isMobile": true,
-    "version": "0.1.0"
+    "version": "v0.1.2-2-g3ef32aa"
   },
   "settings": {},
   "pageTypes": [],

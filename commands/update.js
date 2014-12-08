@@ -6,7 +6,7 @@ var path = require('path'),
     die = require('../utils/die');
 
 var coreVersions = require('./check').coreVersions.slice();
-module.exports = function(dir, opts, cb) {
+var update = function(dir, opts, cb) {
   if (!cb) {
     cb = opts;
     opts = dir;
@@ -16,7 +16,6 @@ module.exports = function(dir, opts, cb) {
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory whose references I should update.");
   }
-  if (!opts) opts = {};
   shellOut('bower cache clean', function(err) {
     if (err) die('Cache clean failed: ' + err.message);
     coreVersions.forEach(function(ver) {
@@ -39,3 +38,11 @@ module.exports = function(dir, opts, cb) {
     });
   }, { cwd: themeDir } );
 };
+
+update._doc = {
+  args: '<path>',
+  description: 'Update references folder.',
+  options: {}
+}
+
+module.exports = update;

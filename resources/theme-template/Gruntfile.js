@@ -29,15 +29,23 @@ module.exports = function(grunt) {
     '*.png'
   ],
 
-versionCmd = ':'; // e.g. 'git describe --tags --always' or 'svn info'
+versionCmd = 'git describe --tags --always'; // e.g. 'git describe --tags --always' or 'svn info'
 
 function getVersion(cb) {
-  grunt.util.spawn(versionCmd, cb);
+  if (!versionCmd) return cb(null, '0.1.0');
+  var cmd = versionCmd.split(' ');
+  grunt.util.spawn({
+    cmd: cmd[0],
+    args: cmd.slice(1)
+  }, function(err, res) {
+    cb(err, res.stdout);
+  });
 }
 
+var pkg = grunt.file.readJSON('package.json');
+
 grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
-    theme: grunt.file.readJSON('theme.json'),
+    pkg: pkg,
     jsonlint: {
       theme_json: {
         src: jsonFiles
@@ -64,17 +72,10 @@ grunt.initConfig({
         }
       }
     },
-    zubat: {
-      main: {
-        dir: '.',
-        manualancestry: ['./references/<%= theme.about.extends %>'],
-        ignore: ['/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$']
-      }
-    },
     compress: {
       build: {
         options: {
-          archive: '<%= pkg.name %>.zip',
+          archive: '<%= pkg.name %>-<%= pkg.version %>.zip',
           pretty: true
         },
         files: [{
@@ -84,7 +85,21 @@ grunt.initConfig({
       }
     },
     thmaa: {
-      check: {}
+      check: {},
+      update: {},
+      compile: {},
+      buildver: {
+        command: 'set-version',
+        params: getVersion,
+        opts: {
+          'no-bower': true,
+          'no-package': true
+        }
+      },
+      releasever: {
+        command: 'set-version',
+        params: getVersion
+      }
     },
     watch: {
       json: {
@@ -93,50 +108,34 @@ grunt.initConfig({
       },
       javascript: {
         files: jsFiles,
-        tasks: ['jshint','zubat']
+        tasks: ['jshint','thmaa:compile']
       },
       compress: {
         files: filesToArchive,
         tasks: ['compress']
       }
-    },
-    setver: {
-      release: {
-        cmd: versionCmd,
-        themejson: true,
-        packagejson: true,
-        readmemd: true
-      },
-      build: {
-        cmd: versionCmd,
-        themejson: true,
-      },
-      renamezip: {
-        cmd: versionCmd,
-        filenames: ["<%= pkg.name %>.zip"]
-      }
     }
   });
 
-  [
-   'grunt-jsonlint',
-   'grunt-contrib-jshint',
-   'grunt-contrib-watch',
-   'grunt-contrib-compress',
-   'grunt-zubat'
-  ].forEach(grunt.loadNpmTasks);
+// auto-load all package.json dependencies with names starting with 'grunt-'
+  Object.keys(pkg.devDependencies)
+    .filter(function(dep) { return dep.indexOf('grunt-') === 0; })
+    .forEach(grunt.loadNpmTasks);
 
 
   var gCommands = [
     'new',
     'override',
     'update',
-    'check'
+    'check',
+    'set-version',
+    'compile'
   ],
   thmaa = require('thmaa');
-  grunt.registerTask('thmaa', function() {
+  grunt.registerMultiTask('thmaa', function() {
+    var me = this;
     var done = this.async();
-    var target = this.target || this.args[0];
+    var target = (this.data && this.data.command) || this.target || this.args[0];
     var args = this.data && this.data.params;
     if (gCommands.indexOf(target) === -1) {
       grunt.fail.warn('Unrecognized thmaa command `' + target + '`.');
@@ -145,15 +144,16 @@ grunt.initConfig({
     switch(target) {
       case "new":
       case "override":
+      case "set-version": 
         if (!(args && args.length > 0)) {
-          grunt.fail.warn('The thmaa command `' + target + '` requires at least one argument, or a function that takes a callback.')
+          grunt.fail.warn('The thmaa command `' + target + '` requires at least one argument, or a function that takes a callback.');
         }
         break;
     }
     if (typeof args === "function") {
       args(run);
     } else {
-      run(null, args)
+      run(null, args);
     }
     function run(err, params) {
       if (err) {
@@ -161,14 +161,14 @@ grunt.initConfig({
         return false;
       }
       try {
-        thmaa.apply(this, [target].concat(params).concat([this.data && this.data.options, done]));
+        thmaa.apply(me, [target].concat(params).concat([me.data && me.data.opts, done]));
       } catch(e) {
         grunt.fail.warn(e.message);
       }
     }
   });
 
-  grunt.registerTask('build', ['jsonlint', 'jshint', 'checkreferences', 'zubat', 'setver:build', 'compress', 'setver:renamezip']);
-  grunt.registerTask('release', ['jsonlint', 'jshint', 'zubat', 'setver:release', 'compress', 'setver:renamezip']);
+  grunt.registerTask('build', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:compile', 'thmaa:buildver', 'compress']);
+  grunt.registerTask('release', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:compile', 'thmaa:releasever', 'compress']);
   grunt.registerTask('default', ['build']);
 };

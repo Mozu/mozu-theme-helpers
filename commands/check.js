@@ -1,7 +1,7 @@
 var path = require('path'),
     fs = require('fs'),
     semver = require('semver'),
-    color = require('cli-color'),
+    color = require('colors'),
     shellOut = require('../utils/shell-out'),
     getThemeDir = require('../utils/get-theme-dir'),
     die = require('../utils/die'),
@@ -45,10 +45,10 @@ check = function(dir, opts, cb) {
       console.log('Current version of Core' + ver + ' is ' + currentVersion);
       if (semver.gt(currentVersion, installedVersion)) {
         if (ver === activeVersion) {
-          console.log(color.bold('\nYour theme extends Core' + ver + ' and Core' + ver + ' has updated in production!\nRun `thmaa update` to update your local reference and check\nthe repository for release notes.'));
+          console.log('\nYour theme extends Core' + ver + ' and Core' + ver + ' has updated in production!\nRun `thmaa update` to update your local reference and check\nthe repository for release notes.'.bold);
           process.exit(1);
         } else {
-          console.log(color.bold('\nCore' + ver + ' has updated in production.\nYour theme does not extend Core' + ver + ', so no action is necessary,\nbut if you want to maintain a current copy of Core' + ver + ' for reference,\nrun `thmaa update`.'));
+          console.log('\nCore' + ver + ' has updated in production.\nYour theme does not extend Core' + ver + ', so no action is necessary,\nbut if you want to maintain a current copy of Core' + ver + ' for reference,\nrun `thmaa update`.'.bold);
         }
       }
       vers = vers.slice(1);
@@ -60,6 +60,12 @@ check = function(dir, opts, cb) {
     });
   });
 
+};
+
+check._doc = {
+  args: "<path>",
+  description: "Check if references are up to date.",
+  options: {}
 };
 
 check.coreVersions = coreVersions;

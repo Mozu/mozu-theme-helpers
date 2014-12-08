@@ -2,9 +2,10 @@ var path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     getThemeDir = require('../utils/get-theme-dir'),
+    editThemeJson = require('../utils/edit-theme-json'),
     die = require('../utils/die');
 
-module.exports = function(name, opts, cb) {
+var override = function(name, opts, cb) {
   if (!cb || !name) {
     die("Please specify a file path to override from the base theme.");
   }
@@ -19,7 +20,7 @@ module.exports = function(name, opts, cb) {
   var themeDir = getThemeDir();
   if (!themeDir) die("No theme.json found in a parent directory. We do not appear to be inside a Mozu theme.");
 
-  var base = JSON.parse(fs.readFileSync(path.resolve(themeDir, 'theme.json'), 'utf8')).about.extends;
+  var base = editThemeJson.read(themeDir, 'theme.json').about.extends;
 
   if (!base) {
     die("Did not detect a base theme for this theme. Cannot override from anything.");
@@ -45,4 +46,14 @@ module.exports = function(name, opts, cb) {
     fs.writeFileSync(pathName, fs.readFileSync(referredFile));
     cb();
   });
-}
+};
+
+override._doc = {
+  args: '<path>',
+  description: 'Create an override, copying from your base theme.',
+  options: {
+    '--force': 'Force overwrite if an override already exists.'
+  }
+};
+
+module.exports = override;

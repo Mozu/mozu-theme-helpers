@@ -1,12 +1,10 @@
-var die = require('./utils/die'),
+var path = require('path'),
+    fs = require('fs'),
+    die = require('./utils/die'),
 
-    commands = [
-      'help',
-      'new',
-      'override',
-      'update',
-      'check'
-    ];
+    commands = fs.readdirSync(path.resolve(__dirname, 'commands')).map(function(f) {
+      return path.basename(f, '.js');
+    });
 
 module.exports = function(command) {
 
