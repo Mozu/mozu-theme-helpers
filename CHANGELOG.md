@@ -10,3 +10,7 @@
 ## 0.2.2 -- 2014-12-8
 
  - added performance improvements including a local bower check cache
+
+## 0.2.3 -- 2014-12-8
+
+ - improved help readability
