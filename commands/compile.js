@@ -54,7 +54,7 @@ compile._doc = {
   args: '<path>',
   description: 'Compile theme scripts, respecting inheritance.',
   options: {
-    '--ignore': 'Speed up! Specify a pattern of files and directories to ignore when copying, relative to root. Defaults to .git, node_modules',
+    '--ignore': 'Speed up! Specify a pattern of files and directories to ignore when copying, relative to root. Defaults to ".git, node_modules"',
     '--dest': 'Specify a destination other than the default /compiled/scripts directory of your theme.',
     '--verbose': 'Talk a lot.',
     '--quiet': 'Don\'t talk at all.'

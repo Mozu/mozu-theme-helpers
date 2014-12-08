@@ -52,8 +52,8 @@ newTheme._doc = {
   args: '<path>',
   description: 'Create a new theme based on the Core theme.',
   options: {
-    '--name': 'Specify a unique package name. (Defaults to directory name.)',
-    '--friendly-name': 'Specify a display name for SiteBuilder. (Defaults to directory name.)'
+    '--name': 'Specify a unique package name. Defaults to directory name.',
+    '--friendly-name': 'Specify a display name for SiteBuilder. Defaults to directory name.'
   }
 }
 

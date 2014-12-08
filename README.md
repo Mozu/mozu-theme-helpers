@@ -22,23 +22,25 @@ npm install -g thmaa
                                                                                          
   check <path>                            Check if references are up to date.
                                           
-    --all                                 Check all supported versions of the Core t
-                                          heme instead of just the one this theme ex
-                                          tends.
+    --all                                 Check all supported versions of the Core 
+                                          theme instead of just the one this theme 
+                                          extends.
                                           
-    --no-cache                            Skip the local cache. This results in a ca
-                                          ll out to the remote repository every time
-                                          , instead of every day.
+    --no-cache                            Skip the local cache. This results in a 
+                                          call out to the remote repository every 
+                                          time, instead of every day.
 
-  compile <path>                          Compile theme scripts, respecting inherita
-                                          nce.                                          
-    --ignore                              Speed up! Specify a pattern of files and d
-                                          irectories to ignore when copying, relativ
-                                          e to root. Defaults to .git, node_modules
+  compile <path>                          Compile theme scripts, respecting 
+                                          inheritance.
                                           
-    --dest                                Specify a destination other than the defau
-                                          lt /compiled/scripts directory of your the
-                                          me.
+    --ignore                              Speed up! Specify a pattern of files and 
+                                          directories to ignore when copying, 
+                                          relative to root. Defaults to ".git, 
+                                          node_modules"
+                                          
+    --dest                                Specify a destination other than the 
+                                          default /compiled/scripts directory of 
+                                          your theme.
                                           
     --verbose                             Talk a lot.
 
@@ -46,29 +48,31 @@ npm install -g thmaa
     --quiet                               Don't talk at all.
 
 
-  help                                    Print this help
+  help                                    Print this very message
                                           
     --splash                              Display a fancy logo.
 
                                           
-    --forcewidth <n>                      Force display at a certain number of colum
-                                          ns. Defaults to terminal width.
+    --forcewidth <n>                      Force display at a certain number of 
+                                          columns. Defaults to terminal width.
 
-  new <path>                              Create a new theme based on the Core theme
-                                          .                                          
-    --name                                Specify a unique package name. (Defaults t
-                                          o directory name.)
+  new <path>                              Create a new theme based on the Core theme.
                                           
-    --friendly-name                       Specify a display name for SiteBuilder. (D
-                                          efaults to directory name.)
+    --name                                Specify a unique package name. Defaults to 
+                                          directory name.
+                                          
+    --friendly-name                       Specify a display name for SiteBuilder. 
+                                          Defaults to directory name.
 
-  override <path>                         Create an override, copying from your base
-                                           theme.                                          
-    --force                               Force overwrite if an override already exi
-                                          sts.
+  override <path>                         Create an override, copying from your base 
+                                          theme.
+                                          
+    --force                               Force overwrite if an override already 
+                                          exists.
 
-  set-version <path> <version>            Set and synchronize the version number acr
-                                          oss all config files.                                          
+  set-version <path> <version>            Set and synchronize the version number 
+                                          across all config files.
+                                          
     --no-package                          Do not update package.json.
 
                                           
@@ -77,9 +81,9 @@ npm install -g thmaa
 
   update <path>                           Update references folder.
                                           
-    --all                                 Download all versions of the Core theme in
-                                          stead of just the version this theme exten
-                                          ds.
+    --all                                 Download all versions of the Core theme 
+                                          instead of just the version this theme 
+                                          extends.
 
 
 ```

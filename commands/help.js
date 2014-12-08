@@ -32,7 +32,7 @@ var printHelp = function(opts, cb) {
   if (opts.forcewidth) termwidth = opts.forcewidth;
 
   var colwidth = Math.floor(termwidth/2)-2,
-    colWidthRE = new RegExp('.{1,' + colwidth + '}', 'g'),
+    colWidthRE = new RegExp('.{1,' + colwidth + '}\\W', 'g'),
     leftPad = pad("", colwidth),
     methodsText = fs.readdirSync(__dirname).map(function(cmdFile) {
       var doc,
@@ -42,11 +42,13 @@ var printHelp = function(opts, cb) {
       if (path.extname(cmdFile) === ".js") {
         doc = require('./' + cmd)._doc;
         if (doc) {
-          columnified = doc.description.match(colWidthRE);
+          columnified = doc.description.length < colwidth ? [doc.description] : doc.description.match(colWidthRE);
+          console.log(columnified);
           str = pad("  " + cmd + " " + doc.args, colwidth) + columnified.shift() + "\n";
           str += columnified.map(function(ln) {
             return leftPad + ln;
           }).join('\n');
+          if (columnified.length > 0) str += "\n";
           for (var i in doc.options) {
             columnified = doc.options[i].match(colWidthRE);
             str += pad("\n    " + i, colwidth) + columnified.shift() + "\n";
@@ -72,7 +74,7 @@ var printHelp = function(opts, cb) {
 
 printHelp._doc = {
   args: '',
-  description: 'Print this help',
+  description: 'Print this very message',
   options: {
     "--splash": "Display a fancy logo.",
     "--forcewidth <n>": "Force display at a certain number of columns. Defaults to terminal width."
