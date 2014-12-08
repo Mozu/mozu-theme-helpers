@@ -48,7 +48,7 @@ var path = require('path'),
 })(path.resolve(__dirname, '../node_modules/mozu-core-theme'), path.resolve(__dirname, './theme-template'));
 
 // copy usage txt into readme
-require('../commands/help')({ 'no-tty': true, forcewidth: 80}, function(err, txt) {
+require('../commands/help')({ 'no-tty': true, forcewidth: 89}, function(err, txt) {
   fs.writeFileSync(path.resolve(__dirname, '../README.md'), [fs.readFileSync(path.resolve(__dirname, './README.tpt.md'), 'utf-8'), txt, '\n'].join("\n```\n"));
   console.log('wrote README.md');
 });
