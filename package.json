@@ -12,7 +12,7 @@
     "thmaa": "./bin/thmaa"
   },
   "scripts": {
-    "build": "node ./resources/build.js"
+    "prepublish": "node ./resources/build.js"
   },
   "main": "./thmaa",
   "repository": {
