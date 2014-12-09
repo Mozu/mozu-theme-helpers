@@ -119,7 +119,6 @@ grunt.initConfig({
     .forEach(grunt.loadNpmTasks);
 // and load thmaa task
   grunt.loadNpmTasks('thmaa');
-  //require('thmaa/grunt')(grunt);
 
   grunt.registerTask('build', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:quickcompile', 'thmaa:buildver', 'compress']);
   grunt.registerTask('release', ['jsonlint', 'jshint', 'thmaa:check', 'thmaa:compile', 'thmaa:releasever', 'compress']);
