@@ -14,3 +14,7 @@
 ## 0.2.3 -- 2014-12-8
 
  - improved help readability
+
+## 0.2.4 -- 2014-12-9
+
+ - optimized gruntfile
