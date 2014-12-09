@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-var versionCmd = ''; // e.g. 'git describe --tags --always' or 'svn info'
+var versionCmd = 'git describe --tags --always'; // e.g. 'git describe --tags --always' or 'svn info'
 
 grunt.initConfig({
     jsonlint: {
@@ -35,29 +35,6 @@ grunt.initConfig({
         }
       }
     },
-    thmaa: {
-      check: {},
-      update: {},
-      compile: {},
-      quickcompile: {
-        command: 'compile',
-        opts: {
-          'skipminification': true
-        }
-      },
-      buildver: {
-        command: 'set-version',
-        params: getVersion,
-        opts: {
-          'no-bower': true,
-          'no-package': true
-        }
-      },
-      releasever: {
-        command: 'set-version',
-        params: getVersion
-      }
-    },
     compress: {
       build: {
         options: {
@@ -81,6 +58,29 @@ grunt.initConfig({
           ],
           dest: '/'
         }]
+      }
+    },
+    thmaa: {
+      check: {},
+      update: {},
+      compile: {},
+      quickcompile: {
+        command: 'compile',
+        opts: {
+          'skipminification': true
+        }
+      },
+      buildver: {
+        command: 'set-version',
+        params: getVersion,
+        opts: {
+          'no-bower': true,
+          'no-package': true
+        }
+      },
+      releasever: {
+        command: 'set-version',
+        params: getVersion
       }
     },
     watch: {
