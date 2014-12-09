@@ -18,3 +18,8 @@
 ## 0.2.4 -- 2014-12-9
 
  - optimized gruntfile
+
+## 0.2.5 -- 2014-12-9
+
+ - Removed custom Grunt task from Gruntfile, moved to an npm task in the thmaa repo
+ - Simplified help generator
