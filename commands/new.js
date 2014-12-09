@@ -39,8 +39,13 @@ var newTheme = function(themeName, opts, cb) {
       console.log("Installed node modules");
       update(newThemeDir, opts, function(err) {
         if (err) throw err;
-        console.log("\nCreated new theme " + themeName + " in " + newThemeDir);
-        cb();
+
+        // TODO: factor out as soon as we can install thmaa from npm
+        shellOut('npm link thmaa', function(err) {
+          if (err) throw new Error("If you're on Windows 7 please run this command as an administrator, because we need to make a symlink");
+          console.log("\nCreated new theme " + themeName + " in " + newThemeDir);
+          cb();
+        }, { cwd: newThemeDir });
       });
     }, { cwd: newThemeDir });
 
