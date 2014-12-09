@@ -14,7 +14,7 @@ Command-line toolbelt for common tasks involving Mozu themes.
 
 ## Install
 ```
-npm install -g thmaa
+npm install -g
 ```
 
 ## Usage
