@@ -22,12 +22,13 @@ function pad(txt, n) {
   }).join('\n');
 }
 
-var shortHeader = "\n  Theme Helper for Mozu and Associated Assets\n"
+var shortHeader = "\n  Theme Helper for Mozu and Associated Assets\n",
+    usageTxt = "\n  The <path> parameter defaults to the current directory.\n";
 
 var printHelp = function(opts, cb) {
   if (!opts) opts = {};
-  var headerTxt = (opts.splash && termwidth >= 80 && termheight >= 30) ? fs.readFileSync(path.resolve(__dirname, '../resources/header.txt'), 'utf-8') : shortHeader,
-    usageTxt = fs.readFileSync(path.resolve(__dirname, '../resources/usage.txt'), 'utf-8');
+
+  var headerTxt = (opts.splash && termwidth >= 80 && termheight >= 30) ? fs.readFileSync(path.resolve(__dirname, '../resources/header.txt'), 'utf-8') : shortHeader;
 
   if (opts.forcewidth) termwidth = opts.forcewidth;
 
@@ -43,7 +44,6 @@ var printHelp = function(opts, cb) {
         doc = require('./' + cmd)._doc;
         if (doc) {
           columnified = doc.description.length < colwidth ? [doc.description] : doc.description.match(colWidthRE);
-          console.log(columnified);
           str = pad("  " + cmd + " " + doc.args, colwidth) + columnified.shift() + "\n";
           str += columnified.map(function(ln) {
             return leftPad + ln;

@@ -1,1 +1,0 @@
-  If you don't supply a <path> to a command, thmaa will assume the current directory.
