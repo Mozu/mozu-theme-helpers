@@ -26,6 +26,10 @@ var override = function(name, opts, cb) {
     die("Did not detect a base theme for this theme. Cannot override from anything.");
   }
 
+  if (typeof base !== "string") {
+    die("Could not read the base theme for this theme. Please check to see that theme.json is properly formatted.")
+  }
+
   var referredThemes = fs.readdirSync(path.resolve(themeDir, 'references')),
       baseThemeDirName = referredThemes[referredThemes.map(function(f) { return f.toLowerCase(); }).indexOf(base.toLowerCase())];
 
