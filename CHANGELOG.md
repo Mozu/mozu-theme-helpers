@@ -23,3 +23,9 @@
 
  - Removed custom Grunt task from Gruntfile, moved to an npm task in the thmaa repo
  - Simplified help generator
+
+## 0.3.0 -- 2014-12-12
+
+ - Removed Bower dependency and moved to direct Github API contact.
+ - Improved logging a lot.
+ - Removed direct Mozu Core Theme dependency for cleaner install.

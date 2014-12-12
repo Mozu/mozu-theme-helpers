@@ -7,8 +7,9 @@ Command-line toolbelt for common tasks involving Mozu themes.
  - nodejs 0.10 or above
 
 ## Install
+Needs to be locally installed to build for now, so run the following once you've downloaded it:
 ```
-npm install -g
+npm install && npm install -g
 ```
 
 ## Usage
