@@ -1,9 +1,11 @@
 var path = require('path'),
     fs = require('fs'),
     rimraf = require('rimraf'),
-    shellOut = require('../utils/shell-out'),
+    https = require('https'),
+    extractTarballStream = require('../utils/extract-tarball-stream'),
     getThemeDir = require('../utils/get-theme-dir'),
     editThemeJson = require('../utils/edit-theme-json'),
+    getLatestGithubRelease = require('../utils/get-latest-github-release'),
     die = require('../utils/die');
 
 var coreMajorVersions = require('./check').coreMajorVersions.slice();
@@ -17,30 +19,46 @@ var update = function(dir, opts, cb) {
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory whose references I should update.");
   }
-  shellOut('bower cache clean', function(err) {
-    if (err) die('Cache clean failed: ' + err.message);
-    if (!opts || !opts.all) {
-      coreMajorVersions = [editThemeJson.read(themeDir, 'theme.json').about.extends.replace(/core/i,'')];
-    }
-    coreMajorVersions.forEach(function(ver) {
-      rimraf(path.resolve(themeDir, 'references', 'core' + ver), function(err) {
-        if (err) die(err.message);
-        var json = '';
-        var child = shellOut('bower install core' + ver + '=mozu/core-theme#^' + ver + ' -j --production --config.directory=references', function() {
-          if (err) throw err;
-          JSON.parse(json).filter(function(log) { return log.id === "resolved" }).forEach(function(log) {
-            console.log("Your reference to Core Theme version " + ver + " is now at version " + log.message.split('#').pop());
+  
+  if (!opts || !opts.all) {
+    coreMajorVersions = [editThemeJson.read(themeDir, 'theme.json').about.extends.replace(/core/i,'')];
+  }
+
+  coreMajorVersions.forEach(function(ver) {
+    var refdir = path.resolve(themeDir, 'references', 'core' + ver);
+    rimraf(refdir, function(err) {
+      if (err) die(err.message);
+      getLatestGithubRelease('mozu/core-theme', ver, function(release, newVer) {
+        console.log('Found release ' + newVer + ' on GitHub. Downloading and extracting to ' + path.relative(themeDir, process.cwd()) + 'references/core' + ver + '...');
+
+        function writeTarball(res) {
+          extractTarballStream(res, { path: refdir, strip: 1 } , function() {
+            console.log("Your reference to Core Theme version " + ver + " is now at version " + newVer);
+            console.log('Finishing extraction...');
+            coreMajorVersions = coreMajorVersions.slice(1);
+            if (coreMajorVersions.length === 0) {
+              cb(null);
+            }
           });
-          coreMajorVersions = coreMajorVersions.slice(1);
-          if (coreMajorVersions.length === 0) cb();
-        }, { stdio: 'pipe', cwd: themeDir });
-        child.stderr.setEncoding('utf8')
-        child.stderr.on('data', function(chunk) {
-          json += chunk;
+        }
+
+        https.get({
+          host: 'api.github.com',
+          path: release.tarball_url.replace('https://api.github.com', ''),
+          headers: {
+            'User-Agent': 'thmaa'
+          }
+        }, function(res) {
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            // it often will, this is a CDN redirect
+            https.get(res.headers.location, writeTarball);
+          } else {
+            writeTarball(res);
+          }
         });
       });
-    });
-  }, { cwd: themeDir } );
+    });  
+  });
 };
 
 update._doc = {

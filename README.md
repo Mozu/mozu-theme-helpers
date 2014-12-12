@@ -5,12 +5,6 @@ Command-line toolbelt for common tasks involving Mozu themes.
 
 ## Requires
  - nodejs 0.10 or above
- - git
-   - *Note: If using on Windows, remember to install Git to be used at the Windows cmd.exe command line, as well as Git-Bash.*
- - bower 1.3 or above
-   - install with `npm install -g bower`
- - grunt-cli 0.4 or above
-   - install with `npm install -g grunt-cli`
 
 ## Install
 ```

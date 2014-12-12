@@ -13,13 +13,14 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('thmaa', function() {
     var me = this;
-    var done = this.async();
+    var optsAndCallback = [this.async()];
     var target = (this.data && this.data.command) || this.target || this.args[0];
     var args = this.data && this.data.params;
     if (gCommands.indexOf(target) === -1) {
       grunt.fail.warn('Unrecognized thmaa command `' + target + '`.');
       return false;
     }
+    if (this.data && this.data.opts) optsAndCallback.unshift(this.data.opts);
     switch(target) {
       case "new":
       case "override":
@@ -40,7 +41,7 @@ module.exports = function(grunt) {
         return false;
       }
       try {
-        thmaa.apply(me, [target].concat(params).concat([me.data && me.data.opts, done]));
+        thmaa.apply(me, [target].concat(params).concat(optsAndCallback));
       } catch(e) {
         grunt.fail.warn(e.message);
       }

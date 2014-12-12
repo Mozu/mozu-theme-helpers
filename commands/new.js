@@ -34,20 +34,36 @@ var newTheme = function(themeName, opts, cb) {
       return tj;
     });
 
-    shellOut('npm install', function(err){
-      if (err) throw err;
-      console.log("Installed node modules");
-      update(newThemeDir, opts, function(err) {
-        if (err) throw err;
+    // install grunt-cli if it's not installed already
+    console.log('Detecting grunt-cli...');
+    shellOut((/^win/.test(process.platform) ? "where grunt" : "which grunt"), function(err) {
+      if (err) {
+        console.log('No global grunt detected. Installing grunt-cli...');
+        shellOut('npm install -g grunt-cli', function(err) {
+          if (err) die(err);
+          finish();
+        });
+      } else {
+        finish();
+      }
+    });
 
-        // TODO: factor out as soon as we can install thmaa from npm
-        shellOut('npm link thmaa', function(err) {
-          if (err) throw new Error("If you're on Windows 7 please run this command as an administrator, because we need to make a symlink");
-          console.log("\nCreated new theme " + themeName + " in " + newThemeDir);
-          cb();
-        }, { cwd: newThemeDir });
-      });
-    }, { cwd: newThemeDir });
+    function finish() {
+      shellOut('npm install', function(err){
+        if (err) throw err;
+        console.log("Installed node modules");
+        update(newThemeDir, opts, function(err) {
+          if (err) throw err;
+
+          // TODO: factor out as soon as we can install thmaa from npm
+          shellOut('npm link thmaa', function(err) {
+            if (err) throw new Error("If you're on Windows 7 please run this command as an administrator, because we need to make a symlink");
+            console.log("\nCreated new theme " + themeName + " in " + newThemeDir);
+            cb();
+          }, { cwd: newThemeDir });
+        });
+      }, { cwd: newThemeDir });
+    }
 
   });
 

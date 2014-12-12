@@ -1,34 +1,28 @@
 var path = require('path'),
     tmp = require('os').tmpdir(),
     fs = require('fs'),
-    semver = require('semver'),
     color = require('colors'),
-    shellOut = require('../utils/shell-out'),
+    semver = require('semver'),
     getThemeDir = require('../utils/get-theme-dir'),
     editThemeJson = require('../utils/edit-theme-json'),
+    getLatestGithubRelease = require('../utils/get-latest-github-release'),
     die = require('../utils/die'),
 
     coreMajorVersions = [4,5,6],
 
     today = new Date(),
 
-    getLatestCoreVersion = function(dir, major, cb) {
-      var json = '';
-      var child = shellOut("bower info mozu/core-theme#^" + major + ' -j', function(err) {
-        if (err) die(err.message);
-        cb(JSON.parse(json).version);
-      }, { stdio: 'pipe', cwd: dir });
-      child.stdout.setEncoding('utf8')
-      child.stdout.on('data', function(chunk) {
-        json += chunk;
+    getLatestCoreVersion = function(major, cb) {
+      getLatestGithubRelease('mozu/core-theme', major, function(release, ver) {
+        cb(ver);
       });
     },
 
-    getLatestCoreVersionWithCache = function(dir, major, cb) {
+    getLatestCoreVersionWithCache = function(major, cb) {
       var cacheFile = path.resolve(tmp, 'thmaa-' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + "-core" + major + "-version.cache")
       fs.readFile(cacheFile, { encoding: 'utf8' }, function(err, v) {
         if (err) {
-          getLatestCoreVersion(dir, major, function(v) {
+          getLatestCoreVersion(major, function(v) {
             fs.writeFile(cacheFile, v, { encoding: 'utf8' }, function(err) {
               //it would be weird, but okay, if this didn't work, since it's just a performance cache to avoid an http call
               cb(v);
@@ -76,7 +70,7 @@ check = function(dir, opts, cb) {
     }
     var getLatest = (opts['cache'] === false) ? getLatestCoreVersion : getLatestCoreVersionWithCache;
 
-    getLatest(themeDir, major, function(latestVersion) {
+    getLatest(major, function(latestVersion) {
       console.log('Installed version of Core' + major + ' is ' + installedVersion);
       console.log('Current version of Core' + major + ' is ' + latestVersion);
       if (semver.gt(latestVersion, installedVersion)) {
