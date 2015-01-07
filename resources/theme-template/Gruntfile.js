@@ -45,16 +45,11 @@ grunt.initConfig({
         },
         files: [{
           src: [
-            'compiled/**',
-            'labels/**',
-            'resources/**',
-            'scripts/**',
-            'stylesheets/**',
-            'templates/**',
-            '*.js',
-            '*.json',
-            '*.ico',
-            '*.png'
+            '**',
+            '!node_modules/**',
+            '!references/**',
+            '!.inherited',
+            '!Gruntfile.js'
           ],
           dest: '/'
         }]
