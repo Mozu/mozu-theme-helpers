@@ -29,3 +29,7 @@
  - Removed Bower dependency and moved to direct Github API contact.
  - Improved logging a lot.
  - Removed direct Mozu Core Theme dependency for cleaner install.
+
+## 0.3.1 -- 2015-01-07
+
+ - updated Gruntfile: replaced whitelist of files to compress with blacklist of files not to compress
