@@ -49,7 +49,7 @@ grunt.initConfig({
             '!node_modules/**',
             '!references/**',
             '!.inherited',
-            '!Gruntfile.js'
+            '!*.zip'
           ],
           dest: '/'
         }]
@@ -67,15 +67,25 @@ grunt.initConfig({
       },
       buildver: {
         command: 'set-version',
-        params: getVersion,
-        opts: {
-          'no-bower': true,
-          'no-package': true
+        opts: function(callback) {
+          getVersion(function(err, ver) {
+            callback(err, {
+              version: ver,
+              'no-bower': true,
+              'no-package': true
+            });
+          });
         }
       },
       releasever: {
         command: 'set-version',
-        params: getVersion
+        opts: function(callback) {
+          getVersion(function(err, ver) {
+            callback(err, {
+              version: ver
+            });
+          });
+        }
       }
     },
     watch: {
@@ -96,13 +106,14 @@ grunt.initConfig({
 
   var lastVersionGot;
   function getVersion(cb) {
-    if (!versionCmd) return cb(null, '0.1.0');
+    if (!versionCmd) return cb(null, pkg.version);
     var cmd = versionCmd.split(' ');
     grunt.util.spawn({
       cmd: cmd[0],
       args: cmd.slice(1)
     }, function(err, res) {
-      cb(err, lastVersionGot = res.stdout.replace(/^v/,''));
+      lastVersionGot = res.stdout.replace(/^v/,'');
+      cb(err, lastVersionGot);
     });
   }
 

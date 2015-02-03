@@ -26,7 +26,6 @@ var shortHeader = "\n  Theme Helper for Mozu and Associated Assets\n",
     usageTxt = "\n  The <path> parameter defaults to the current directory.\n";
 
 var printHelp = function(opts, cb) {
-  if (!opts) opts = {};
 
   var headerTxt = (opts.splash && termwidth >= 80 && termheight >= 30) ? fs.readFileSync(path.resolve(__dirname, '../resources/header.txt'), 'utf-8') : shortHeader;
 
@@ -71,6 +70,11 @@ var printHelp = function(opts, cb) {
     cb(null, [pad(headerTxt, termwidth), pad(usageTxt, termwidth), methodsText].join('\n') );
   }
 };
+
+printHelp.transformArguments = function(conf) {
+  return conf.options;
+};
+
 
 printHelp._doc = {
   args: '',

@@ -5,7 +5,10 @@ var color = require('colors'),
     
 if (!argv._[0]) argv._[0] = 'help';
 
-require('../thmaa').apply(this, argv._.concat([argv, function(err) {
+require('../thmaa')(argv._[0], {
+  options: argv,
+  _args: argv._.slice(1),
+}, function(err) {
   if (err) {
     if (argv.debug) {
       throw err;
@@ -14,5 +17,4 @@ require('../thmaa').apply(this, argv._.concat([argv, function(err) {
       process.exit(err.code || 1);
     }
   }
-  process.exit(0);
-}]));
+});

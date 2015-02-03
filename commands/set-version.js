@@ -2,16 +2,13 @@ var getThemeDir = require('../utils/get-theme-dir'),
     editThemeJson = require('../utils/edit-theme-json'),
     die = require('../utils/die');
 
-var setVersion = function(dir, version, opts, cb) {
+var setVersion = function(opts, cb) {
+
+  var dir = opts.dir,
+      version = opts.version;
 
   var toUpdate = ['package.json','bower.json'];
-  if (arguments.length === 3 && typeof opts === "function") {
-    cb = opts;
-    opts = version;
-    version = dir;
-    dir = process.cwd();
-  }
-  opts = opts || {};
+
   if (opts['no-package'] || (opts.package === false)) toUpdate.shift();
   if (opts['no-bower'] || (opts.bower === false)) toUpdate.pop();
   var themeDir = getThemeDir(dir);
@@ -34,6 +31,20 @@ var setVersion = function(dir, version, opts, cb) {
   console.log('Updated theme.json to version ' + version);
   cb();
 };
+
+setVersion.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.dir = conf._args[0];
+  if (conf._args.length > 1) {
+    opts.dir = conf._args[0]
+    opts.version = conf._args[1];
+  } else {
+    opts.dir = process.cwd();
+    opts.version = conf._args[0];
+  }
+  return opts;
+};
+
 
 setVersion._doc = {
   args: '<path> <version>',

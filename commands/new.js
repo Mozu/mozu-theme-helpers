@@ -8,11 +8,11 @@ var path = require('path'),
 
 ncp.limit = 16;
 
-var newTheme = function(themeName, opts, cb) {
-  if (!cb || !themeName) {
+var newTheme = function(opts, cb) {
+  if (!opts.themeName) {
     die("Please supply a directory name for your new theme.");
   }
-  if (!opts) opts = {};
+  var themeName = opts.themeName;
   var newThemeDir = path.resolve(process.cwd(), themeName);
   ncp(path.resolve(__dirname, '../resources/theme-template'), newThemeDir, function (err) {
     if (err) die(err.message);
@@ -52,7 +52,7 @@ var newTheme = function(themeName, opts, cb) {
       shellOut('npm install', function(err){
         if (err) throw err;
         console.log("Installed node modules");
-        update(newThemeDir, opts, function(err) {
+        update({ dir: newThemeDir }, function(err) {
           if (err) throw err;
 
           // TODO: factor out as soon as we can install thmaa from npm
@@ -68,6 +68,12 @@ var newTheme = function(themeName, opts, cb) {
   });
 
 };
+
+newTheme.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.themeName = conf._args[0];
+  return opts;
+}
 
 newTheme._doc = {
   args: '<path>',

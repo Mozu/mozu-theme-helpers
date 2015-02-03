@@ -9,12 +9,9 @@ var path = require('path'),
     die = require('../utils/die');
 
 var coreMajorVersions = require('./check').coreMajorVersions.slice();
-var update = function(dir, opts, cb) {
-  if (!cb) {
-    cb = opts;
-    opts = dir;
-    dir = process.cwd();
-  }
+var update = function(opts, cb) {
+  
+  var dir = opts.dir;
   var themeDir = getThemeDir(dir);
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory whose references I should update.");
@@ -59,6 +56,12 @@ var update = function(dir, opts, cb) {
       });
     });  
   });
+};
+
+update.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.dir = conf._args[0] || process.cwd();
+  return opts;
 };
 
 update._doc = {

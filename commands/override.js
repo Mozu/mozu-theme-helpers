@@ -5,11 +5,10 @@ var path = require('path'),
     editThemeJson = require('../utils/edit-theme-json'),
     die = require('../utils/die');
 
-var override = function(name, opts, cb) {
-  if (!cb || !name) {
+var override = function(opts, cb) {
+  if (opts.name) {
     die("Please specify a file path to override from the base theme.");
   }
-  if (!opts) opts = {};
 
   var pathName = path.resolve(name);
 
@@ -51,6 +50,12 @@ var override = function(name, opts, cb) {
     cb();
   });
 };
+
+override.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.name = conf._args[0] || process.cwd();
+  return opts;
+}
 
 override._doc = {
   args: '<path>',

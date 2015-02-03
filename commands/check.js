@@ -35,13 +35,8 @@ var path = require('path'),
     },
 
 
-check = function(dir, opts, cb) {
-  if (!cb) {
-    cb = opts;
-    opts = dir;
-    dir = process.cwd();
-  }
-  if (!opts) opts = {};
+check = function(opts, cb) {
+  var dir = opts.dir;
   var themeDir = getThemeDir(dir);
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory whose references I should check.");
@@ -87,6 +82,12 @@ check = function(dir, opts, cb) {
 
   });
 
+};
+
+check.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.dir = conf._args[0] || process.cwd();
+  return opts;
 };
 
 check._doc = {

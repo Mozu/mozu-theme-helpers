@@ -4,18 +4,12 @@ var path = require('path'),
     getThemeDir = require('../utils/get-theme-dir'),
     editThemeJson = require('../utils/edit-theme-json')
 
-var compile = function(dir, opts, cb) {
-  if (!cb) {
-    cb = opts;
-    opts = dir;
-    dir = process.cwd();
-  }
+var compile = function(opts, cb) {
+  var dir = opts.dir;
   var themeDir = getThemeDir(dir);
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory to compile.");
   }
-
-  if (!opts) opts = {};
 
   var base = editThemeJson.read(themeDir, 'theme.json').about.extends;
 
@@ -49,6 +43,13 @@ var compile = function(dir, opts, cb) {
   });
 
 }
+
+compile.transformArguments = function(conf) {
+  var opts = conf.options;
+  opts.dir = conf._args[0] || process.cwd();
+  return opts;
+};
+
 
 compile._doc = {
   args: '<path>',
