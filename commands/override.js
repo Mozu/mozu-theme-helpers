@@ -2,7 +2,7 @@ var path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     getThemeDir = require('../utils/get-theme-dir'),
-    editThemeJson = require('../utils/edit-theme-json'),
+    metadata = require('thmaa-metadata'),
     die = require('../utils/die');
 
 var override = function(opts, cb) {
@@ -19,7 +19,7 @@ var override = function(opts, cb) {
   var themeDir = getThemeDir();
   if (!themeDir) die("No theme.json found in a parent directory. We do not appear to be inside a Mozu theme.");
 
-  var base = editThemeJson.read(themeDir, 'theme.json').about.extends;
+  var base = metadata.read(themeDir, 'theme').about.extends;
 
   if (!base) {
     die("Did not detect a base theme for this theme. Cannot override from anything.");

@@ -1,5 +1,5 @@
 var getThemeDir = require('../utils/get-theme-dir'),
-    editThemeJson = require('../utils/edit-theme-json'),
+    metadata = require('thmaa-metadata'),
     die = require('../utils/die');
 
 var setVersion = function(opts, cb) {
@@ -7,7 +7,7 @@ var setVersion = function(opts, cb) {
   var dir = opts.dir,
       version = opts.version;
 
-  var toUpdate = ['package.json','bower.json'];
+  var toUpdate = ['package','bower'];
 
   if (opts['no-package'] || (opts.package === false)) toUpdate.shift();
   if (opts['no-bower'] || (opts.bower === false)) toUpdate.pop();
@@ -17,14 +17,14 @@ var setVersion = function(opts, cb) {
   version = version.toString();
   toUpdate.forEach(function(filename) {
     try {
-      editThemeJson.modify(themeDir, filename, function(json) {
+      metadata.modify(themeDir, filename, function(json) {
         json.version = version;
         return json;
       });
-      console.log('Updated ' + filename + ' to version ' + version);
+      console.log('Updated ' + filename + ' file to version ' + version);
     } catch(e) {}
   });
-  editThemeJson.modify(themeDir, 'theme.json', function(json) {
+  metadata.modify(themeDir, 'theme', function(json) {
     json.about.version = version;
     return json;
   });

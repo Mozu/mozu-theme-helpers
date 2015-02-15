@@ -1,7 +1,7 @@
 var path = require('path'),
     fs = require('fs'),
     shellOut = require('../utils/shell-out'),
-    editThemeJson = require('../utils/edit-theme-json'),
+    metadata = require('thmaa-metadata'),
     die = require('../utils/die'),
     update = require('./update'),
     ncp = require('ncp').ncp;
@@ -21,13 +21,13 @@ var newTheme = function(opts, cb) {
 
     var provisionalThemeName = opts.name || path.basename(themeName);
 
-    editThemeJson.modify(newThemeDir, 'package.json', function(pkg) {
+    metadata.modify(newThemeDir, 'package', function(pkg) {
       pkg.name = provisionalThemeName;
       console.log("Modified package.json");
       return pkg;
     });
 
-    editThemeJson.modify(newThemeDir, 'theme.json', function(tj) {
+    metadata.modify(newThemeDir, 'theme', function(tj) {
       tj.about.name = opts['friendly-name'] || provisionalThemeName;
       if (opts.base) tj.about.extends = opts.base;
       console.log("Modified theme.json");

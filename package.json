@@ -35,6 +35,7 @@
     "rimraf": "^2.2.8",
     "semver": "^4.1.0",
     "tar": "^1.0.3",
+    "thmaa-metadata": "^0.1.0",
     "zubat": "^0.3.0"
   },
   "license": "MIT"

@@ -4,7 +4,7 @@ var path = require('path'),
     color = require('colors'),
     semver = require('semver'),
     getThemeDir = require('../utils/get-theme-dir'),
-    editThemeJson = require('../utils/edit-theme-json'),
+    metadata = require('thmaa-metadata'),
     getLatestGithubRelease = require('../utils/get-latest-github-release'),
     die = require('../utils/die'),
 
@@ -41,7 +41,7 @@ check = function(opts, cb) {
   if (!themeDir) {
     die("Not inside a theme directory. Please supply a theme directory whose references I should check.");
   }
-  var themejson = editThemeJson.read(themeDir, 'theme.json');
+  var themejson = metadata.read(themeDir, 'theme');
   var activeMajor = coreMajorVersions.filter(function(major) {
     return themejson.about.extends.toLowerCase().trim() === "core" + major;
   })[0];

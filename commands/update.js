@@ -4,7 +4,7 @@ var path = require('path'),
     https = require('https'),
     extractTarballStream = require('../utils/extract-tarball-stream'),
     getThemeDir = require('../utils/get-theme-dir'),
-    editThemeJson = require('../utils/edit-theme-json'),
+    metadata = require('thmaa-metadata'),
     getLatestGithubRelease = require('../utils/get-latest-github-release'),
     die = require('../utils/die');
 
@@ -18,7 +18,7 @@ var update = function(opts, cb) {
   }
   
   if (!opts || !opts.all) {
-    coreMajorVersions = [editThemeJson.read(themeDir, 'theme.json').about.extends.replace(/core/i,'')];
+    coreMajorVersions = [metadata.read(themeDir, 'theme').about.extends.replace(/core/i,'')];
   }
 
   coreMajorVersions.forEach(function(ver) {

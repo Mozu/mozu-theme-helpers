@@ -2,7 +2,7 @@ var path = require('path'),
     zubat = require('zubat'),
     color = require('colors'),
     getThemeDir = require('../utils/get-theme-dir'),
-    editThemeJson = require('../utils/edit-theme-json')
+    metadata = require('thmaa-metadata')
 
 var compile = function(opts, cb) {
   var dir = opts.dir;
@@ -11,7 +11,7 @@ var compile = function(opts, cb) {
     die("Not inside a theme directory. Please supply a theme directory to compile.");
   }
 
-  var base = editThemeJson.read(themeDir, 'theme.json').about.extends;
+  var base = metadata.read(themeDir, 'theme').about.extends;
 
   if (base) opts.manualancestry = [path.resolve(themeDir, 'references', base)]; 
 
