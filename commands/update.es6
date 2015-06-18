@@ -7,7 +7,7 @@ import metadata from "../utils/metadata";
 import getGithubResource from "../utils/get-github-resource";
 import getLatestGithubRelease from "../utils/get-latest-github-release";
 
-let update = function({ dir, cache = true }, log, cb) {
+let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }, log, cb) {
 
   let themeDir = getThemeDir(dir);
 
@@ -15,25 +15,28 @@ let update = function({ dir, cache = true }, log, cb) {
     return cb(new Error("Not inside a theme directory. Please supply a theme directory whose references I should update."));
   }
 
-  let pkg = metadata.read(themeDir, 'package');
-  let theme = metadata.read(themeDir, 'theme');
-
-  if (theme.about.extends !== pkg.config.baseTheme) {
-    return cb(new Error(`Theme extends ${theme.about.extends} but package.json instead refers to a repo for ${pkg.config.baseTheme}.`));
+  if (!repo || !themeName) {
+    let pkg = metadata.read(themeDir, 'package');
+    let theme = metadata.read(themeDir, 'theme');
+    repo = pkg.config.baseThemeRepo;
+    themeName = pkg.config.baseTheme;
+    if (theme.about.extends !== pkg.config.baseTheme) {
+      return cb(new Error(`Theme extends ${theme.about.extends} but package.json instead refers to a repo for ${pkg.config.baseTheme}.`));
+    }
   }
 
-  if (!pkg.config.baseThemeRepo) {
+  if (!repo) {
     return cb(new Error("No theme repo specified; cannot check for updates."));
   }
 
-  let refDir = path.resolve(themeDir, 'references', slug(pkg.config.baseTheme));
+  let refDir = path.resolve(themeDir, 'references', slug(themeName));
 
   rimraf(refDir, function(err) {
 
     fs.mkdirSync(refDir);
     if (err) return cb(err);
 
-    getLatestGithubRelease(pkg.config.baseThemeRepo, { cache: cache }).then(function(release) {
+    getLatestGithubRelease(repo, { cache: cache }).then(function(release) {
       let releaseUrl = release.tarball_url.replace('https://api.github.com', '');
 
       let tarballStream = getGithubResource({

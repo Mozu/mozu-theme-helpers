@@ -20,8 +20,12 @@ var getLatestGithubRelease = _interopRequire(require("../utils/get-latest-github
 
 var update = function update(_ref, log, cb) {
   var dir = _ref.dir;
+  var repo = _ref.repo;
+  var themeName = _ref.themeName;
   var _ref$cache = _ref.cache;
   var cache = _ref$cache === undefined ? true : _ref$cache;
+  var _ref$versionRange = _ref.versionRange;
+  var versionRange = _ref$versionRange === undefined ? "*" : _ref$versionRange;
 
   var themeDir = getThemeDir(dir);
 
@@ -29,25 +33,28 @@ var update = function update(_ref, log, cb) {
     return cb(new Error("Not inside a theme directory. Please supply a theme directory whose references I should update."));
   }
 
-  var pkg = metadata.read(themeDir, "package");
-  var theme = metadata.read(themeDir, "theme");
-
-  if (theme.about["extends"] !== pkg.config.baseTheme) {
-    return cb(new Error("Theme extends " + theme.about["extends"] + " but package.json instead refers to a repo for " + pkg.config.baseTheme + "."));
+  if (!repo || !themeName) {
+    var pkg = metadata.read(themeDir, "package");
+    var theme = metadata.read(themeDir, "theme");
+    repo = pkg.config.baseThemeRepo;
+    themeName = pkg.config.baseTheme;
+    if (theme.about["extends"] !== pkg.config.baseTheme) {
+      return cb(new Error("Theme extends " + theme.about["extends"] + " but package.json instead refers to a repo for " + pkg.config.baseTheme + "."));
+    }
   }
 
-  if (!pkg.config.baseThemeRepo) {
+  if (!repo) {
     return cb(new Error("No theme repo specified; cannot check for updates."));
   }
 
-  var refDir = path.resolve(themeDir, "references", slug(pkg.config.baseTheme));
+  var refDir = path.resolve(themeDir, "references", slug(themeName));
 
   rimraf(refDir, function (err) {
 
     fs.mkdirSync(refDir);
     if (err) return cb(err);
 
-    getLatestGithubRelease(pkg.config.baseThemeRepo, { cache: cache }).then(function (release) {
+    getLatestGithubRelease(repo, { cache: cache }).then(function (release) {
       var releaseUrl = release.tarball_url.replace("https://api.github.com", "");
 
       var tarballStream = getGithubResource({
