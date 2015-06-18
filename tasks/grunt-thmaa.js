@@ -1,22 +1,21 @@
 "use strict";
 var gCommands = [
-    'new',
-    'override',
+    // 'override',
     'update',
     'check',
     'set-version',
     'compile'
   ],
-  thmaa = require('thmaa');
+  thmaa = require('../');
 
 module.exports = function(grunt) {
 
-  grunt.registerMultiTask('thmaa', function() {
+  grunt.registerMultiTask('mozutheme', function() {
     var done = this.async();
     var opts = this.data && this.data.opts || {};
     var target = (this.data && this.data.command) || this.target || this.args[0];
     if (gCommands.indexOf(target) === -1) {
-      grunt.fail.warn('Unrecognized thmaa command `' + target + '`.');
+      grunt.fail.warn('Unrecognized mozutheme command `' + target + '`.');
       return false;
     }
     if (typeof opts === "function") {
@@ -30,7 +29,7 @@ module.exports = function(grunt) {
         return false;
       }
       try {
-        thmaa(target, opts, done);
+        thmaa(target, opts, done).on('info', grunt.log.ok.bind(grunt.log));
       } catch(e) {
         grunt.fail.warn(e.message);
       }

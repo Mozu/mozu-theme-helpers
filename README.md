@@ -4,16 +4,30 @@
 Command-line toolbelt for common tasks involving Mozu themes.
 
 ## Requires
- - nodejs 0.10 or above
+ - nodejs 0.12 or above
 
 ## Install
-Needs to be locally installed to build for now, so run the following once you've downloaded it:
 ```
-npm install && npm install -g
+npm install thmaa
 ```
 
-## Usage
+## API
+All command line options are also available via a Node API.
 ```
+var thmaa = require('thmaa');
+thmaa('check', process.cwd(), callback).on('info', console.log);
+```
+
+
+## Install Command Line Utility
+```
+npm install -g thmaa
+```
+
+
+## Command Line Usage
+```
+
                                                                                          
   Theme Helper for Mozu and Associated Assets                                            
                                                                                          
@@ -22,13 +36,9 @@ npm install && npm install -g
                                                                                          
   check <path>                            Check if references are up to date.
                                           
-    --all                                 Check all supported versions of the Core 
-                                          theme instead of just the one this theme 
-                                          extends.
-                                          
     --no-cache                            Skip the local cache. This results in a 
                                           call out to the remote repository every 
-                                          time, instead of every day.
+                                          time, instead of relying on cache.
 
   compile <path>                          Compile theme scripts, respecting 
                                           inheritance.
@@ -56,20 +66,6 @@ npm install && npm install -g
     --forcewidth <n>                      Force display at a certain number of 
                                           columns. Defaults to terminal width.
 
-  new <path>                              Create a new theme based on the Core theme.
-                                          
-    --name                                Specify a unique package name. Defaults to 
-                                          directory name.
-                                          
-    --friendly-name                       Specify a display name for SiteBuilder. 
-                                          Defaults to directory name.
-
-  override <path>                         Create an override, copying from your base 
-                                          theme.
-                                          
-    --force                               Force overwrite if an override already 
-                                          exists.
-
   set-version <path> <version>            Set and synchronize the version number 
                                           across all config files.
                                           
@@ -79,11 +75,11 @@ npm install && npm install -g
     --no-bower                            Do not update bower.json.
 
 
-  update <path>                           Update references folder.
+  update <path>                           Update base theme in references folder.
                                           
-    --all                                 Download all versions of the Core theme 
-                                          instead of just the version this theme 
-                                          extends.
+    --no-cache                            Skip the local cache. This results in a 
+                                          call out to the remote repository every 
+                                          time, instead of relying on cache.
 
 
 ```

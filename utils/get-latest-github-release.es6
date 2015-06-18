@@ -1,0 +1,17 @@
+import getGithubReleases from "./get-github-releases";
+import concat from "concat-stream";
+import semver from "semver";
+
+export default function(repo, { versionRange = '*', cache = true }) {
+  return new Promise(function(resolve, reject) {
+    var releaseStream = getGithubReleases(repo, opts);
+    releaseStream.on('error', reject);
+    releaseStream.pipe(concat(function(releases) {
+      let qualifyingVersions = releases.map( ({ tag_name }) => semver.clean(tag_name))
+      let maxVersion = semver.maxSatisfying(qualifyingVersions, versionRange.toString());
+      // send back the release object matching the max satisfying version,
+      // and the version string itself
+      resolve(releases[qualifyingVersions.indexOf(maxVersion)]);
+    }));
+  });
+}

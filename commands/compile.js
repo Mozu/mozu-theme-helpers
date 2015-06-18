@@ -1,65 +1,76 @@
-var path = require('path'),
-    zubat = require('zubat'),
-    color = require('colors'),
-    getThemeDir = require('../utils/get-theme-dir'),
-    metadata = require('thmaa-metadata')
+"use strict";
 
-var compile = function(opts, cb) {
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var path = _interopRequire(require("path"));
+
+var zubat = _interopRequire(require("zubat"));
+
+var colors = _interopRequire(require("colors"));
+
+var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
+
+var metadata = _interopRequire(require("../utils/metadata"));
+
+var compile = function compile(opts, log, cb) {
   var dir = opts.dir;
+  var manualancestry = opts.manualancestry;
+  var _opts$ignore = opts.ignore;
+  var ignore = _opts$ignore === undefined ? [] : _opts$ignore;
+  var _opts$logLevel = opts.logLevel;
+  var logLevel = _opts$logLevel === undefined ? 2 : _opts$logLevel;
+
   var themeDir = getThemeDir(dir);
-  if (!themeDir) {
-    die("Not inside a theme directory. Please supply a theme directory to compile.");
+
+  if (themeDir) {
+    return log.fail("Not inside a theme directory. Please supply a theme directory to compile.");
   }
 
-  var base = metadata.read(themeDir, 'theme').about.extends;
+  var base = metadata.read(themeDir, "theme").about["extends"];
 
-  if (base) opts.manualancestry = [path.resolve(themeDir, 'references', base)]; 
+  if (base) manualancestry = [path.resolve(themeDir, "references", base)];
 
-  opts.ignore = (opts.ignore || []).concat(['/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$']);
+  ignore.push("/references", "\\.git", "node_modules", "^/resources", "^/tasks", "\\.zip$");
 
-  opts.logLevel = opts.logLevel || 2;
-  
-  var job = zubat(themeDir, opts, function(err) {
-    if (!err) console.log("Theme compilation complete.");
+  var job = zubat(themeDir, opts, function (err) {
+    if (!err) log.info("Theme compilation complete.");
     cb(err);
   });
 
-  job.on('log', function(str, sev) {
-    switch(sev) {
+  job.on("log", function (str, sev) {
+    switch (sev) {
       case "error":
-      job.cleanup(function() {
-        die("Zubat fainted. " + str);
-      });
-      break;
+        job.cleanup(function () {
+          return cb(new Error("Zubat fainted. " + str));
+        });
+        break;
       case "warning":
-      console.log(("zubat: " +str).yellow);
-      job.cleanup(function() {
-        done(false);
-      });
-      break;
+        job.cleanup(function () {
+          return cb(new Error("zubat: " + str));
+        });
+        break;
       default:
-      console.log("zubat: " +str);
+        log.info("zubat: " + str);
     }
   });
-
-}
-
-compile.transformArguments = function(conf) {
-  var opts = conf.options;
-  opts.dir = conf._args[0] || process.cwd();
-  return opts;
 };
 
+compile.transformArguments = function (_ref) {
+  var options = _ref.options;
+  var _args = _ref._args;
+
+  options.dir = _args[0] || process.cwd();
+};
 
 compile._doc = {
-  args: '<path>',
-  description: 'Compile theme scripts, respecting inheritance.',
+  args: "<path>",
+  description: "Compile theme scripts, respecting inheritance.",
   options: {
-    '--ignore': 'Speed up! Specify a pattern of files and directories to ignore when copying, relative to root. Defaults to ".git, node_modules"',
-    '--dest': 'Specify a destination other than the default /compiled/scripts directory of your theme.',
-    '--verbose': 'Talk a lot.',
-    '--quiet': 'Don\'t talk at all.'
+    "--ignore": "Speed up! Specify a pattern of files and directories to ignore when copying, relative to root. Defaults to \".git, node_modules\"",
+    "--dest": "Specify a destination other than the default /compiled/scripts directory of your theme.",
+    "--verbose": "Talk a lot.",
+    "--quiet": "Don't talk at all."
   }
-}
+};
 
 module.exports = compile;

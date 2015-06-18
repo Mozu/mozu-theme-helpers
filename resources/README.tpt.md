@@ -4,12 +4,25 @@
 Command-line toolbelt for common tasks involving Mozu themes.
 
 ## Requires
- - nodejs 0.10 or above
+ - nodejs 0.12 or above
 
 ## Install
-Needs to be locally installed to build for now, so run the following once you've downloaded it:
 ```
-npm install && npm install -g
+npm install thmaa
 ```
 
-## Usage
+## API
+All command line options are also available via a Node API.
+```
+var thmaa = require('thmaa');
+thmaa('check', process.cwd(), callback).on('info', console.log);
+```
+
+
+## Install Command Line Utility
+```
+npm install -g thmaa
+```
+
+
+## Command Line Usage
