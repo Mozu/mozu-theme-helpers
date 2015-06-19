@@ -8,13 +8,19 @@ var fs = _interopRequire(require("fs"));
 
 var rimraf = _interopRequire(require("rimraf"));
 
-var extractTarballStream = _interopRequire(require("../utils/extract-tarball-stream"));
+var mkdirp = _interopRequire(require("mkdirp"));
+
+var zlib = _interopRequire(require("zlib"));
+
+var tar = _interopRequire(require("tar"));
 
 var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
 
 var metadata = _interopRequire(require("../utils/metadata"));
 
 var getGithubResource = _interopRequire(require("../utils/get-github-resource"));
+
+var slug = _interopRequire(require("slug"));
 
 var getLatestGithubRelease = _interopRequire(require("../utils/get-latest-github-release"));
 
@@ -50,50 +56,51 @@ var update = function update(_ref, log, cb) {
   var refDir = path.resolve(themeDir, "references", slug(themeName));
 
   rimraf(refDir, function (err) {
-
-    fs.mkdirSync(refDir);
     if (err) return cb(err);
+    mkdirp(refDir, function (err) {
+      if (err) return cb(err);
 
-    getLatestGithubRelease(repo, { cache: cache }).then(function (release) {
-      var releaseUrl = release.tarball_url.replace("https://api.github.com", "");
+      getLatestGithubRelease(repo, { cache: cache }).then(function (release) {
+        var releaseUrl = release.tarball_url.replace("https://api.github.com", "");
 
-      var tarballStream = getGithubResource({
-        pathname: releaseUrl
-      }, { cache: cache });
+        var tarballStream = getGithubResource({
+          pathname: releaseUrl
+        }, { cache: cache });
 
-      tarballStream.on("error", cb);
+        tarballStream.on("error", cb);
 
-      var fileStream = tarballStream.pipe(extractTarballStream({ dir: refDir, strip: 1 }));
+        var fileStream = tarballStream.pipe(zlib.createGunzip()).pipe(tar.Extract({ path: refDir, strip: 1 }));
 
-      fileStream.on("error", cb);
+        fileStream.on("error", cb);
 
-      fileStream.on("end", function () {
-        (function walk(referenceDir, templatedir) {
-          var inheritedDir,
-              fileList = fs.readdirSync(referenceDir).map(function (filename) {
-            if (ignore[filename]) return false;
-            var stats = fs.statSync(path.resolve(referenceDir, filename));
-            if (stats.isDirectory()) {
-              var _dir = path.resolve(templatedir, filename);
-              if (!fs.existsSync(_dir)) fs.mkdirSync(_dir);
-              walk(path.resolve(referenceDir, filename), _dir);
-              return false;
-            } else if (stats.isFile() && !fs.existsSync(path.resolve(templatedir, filename))) {
-              return filename;
+        fileStream.on("end", function () {
+          (function walk(referenceDir, templatedir) {
+            var inheritedDir,
+                fileList = fs.readdirSync(referenceDir).map(function (filename) {
+              // if (ignore[filename]) return false;
+              var stats = fs.statSync(path.resolve(referenceDir, filename));
+              if (stats.isDirectory()) {
+                var _dir = path.resolve(templatedir, filename);
+                if (!fs.existsSync(_dir)) fs.mkdirSync(_dir);
+                walk(path.resolve(referenceDir, filename), _dir);
+                return false;
+              } else if (stats.isFile() && !fs.existsSync(path.resolve(templatedir, filename))) {
+                return filename;
+              }
+            }).filter(function (x) {
+              return x;
+            });
+
+            if (fileList.length > 0) {
+              fs.writeFileSync(path.resolve(templatedir, ".inherited"), fileList.join("\n"));
             }
-          }).filter(function (x) {
-            return x;
-          });
+          })(refDir, themeDir);
 
-          if (fileList.length > 0) {
-            fs.writeFileSync(path.resolve(templatedir, ".inherited"), fileList.join("\n"));
-          }
-        })(refDir, themeDir);
-
-        log.info("Base theme update complete.");
-        cb(null, "Base theme update complete.");
-      });
-    }, cb);
+          log.info("Base theme update complete.");
+          cb(null, "Base theme update complete.");
+        });
+      })["catch"](cb);
+    });
   });
 };
 

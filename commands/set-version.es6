@@ -31,7 +31,7 @@ var setVersion = function({ dir, version, bower }, log, cb) {
 
   metadata.modify(themeDir, 'theme', json => {
     json.about.version = version;
-    json;
+    return json;
   });
   log.info(`Update theme.json to version ${version}`);
   cb();

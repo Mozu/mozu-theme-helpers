@@ -42,7 +42,7 @@ var setVersion = function setVersion(_ref, log, cb) {
 
   metadata.modify(themeDir, "theme", function (json) {
     json.about.version = version;
-    json;
+    return json;
   });
   log.info("Update theme.json to version " + version);
   cb();

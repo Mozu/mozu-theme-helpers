@@ -15,9 +15,12 @@ module.exports = function (repo, _ref) {
   var cache = _ref$cache === undefined ? true : _ref$cache;
 
   return new Promise(function (resolve, reject) {
-    var releaseStream = getGithubReleases(repo, opts);
+    var releaseStream = getGithubReleases(repo, { versionRange: versionRange, cache: cache });
     releaseStream.on("error", reject);
     releaseStream.pipe(concat(function (releases) {
+      if (!releases || releases.length === 0) {
+        return resolve(null);
+      }
       var qualifyingVersions = releases.map(function (_ref2) {
         var tag_name = _ref2.tag_name;
         return semver.clean(tag_name);

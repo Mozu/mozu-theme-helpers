@@ -1,31 +1,34 @@
 import path from "path";
 import zubat from "zubat";
 import colors from "colors";
+import slug from "slug";
 import getThemeDir from "../utils/get-theme-dir";
 import metadata from "../utils/metadata";
 
 var compile = function(opts, log, cb) {
 
-  var { dir, manualancestry, ignore = [], logLevel = 2 } = opts;
+  opts.ignore = opts.ignore || [];
 
-  var themeDir = getThemeDir(dir);
+  var themeDir = getThemeDir(opts.dir);
 
-  if (themeDir) {
+  if (!themeDir) {
     return log.fail("Not inside a theme directory. Please supply a theme directory to compile.");
   }
 
   var base = metadata.read(themeDir, 'theme').about.extends;
 
-  if (base) manualancestry = [path.resolve(themeDir, 'references', base)];
+  if (base) opts.manualancestry = [path.resolve(themeDir, 'references', slug(base))];
 
-  ignore.push('/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$');
+  opts.ignore.push('/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$');
 
   var job = zubat(themeDir, opts, err => {
+    console.log('ack');
     if (!err) log.info("Theme compilation complete.");
     cb(err);
   });
 
   job.on('log', function(str, sev) {
+    console.log('pth');
     switch(sev) {
       case "error":
         job.cleanup(() => cb(new Error(`Zubat fainted. ${str}`)));

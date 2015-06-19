@@ -13,7 +13,7 @@ var metadata =  {
   read: function(themePath, name) {
     var filePath = path.resolve(themePath, namesToFilenames[name]);
     try {
-      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      return require(filePath);
     } catch(e) {
       throw new Error("Could not read " + filePath + ": " + e.message);
     }

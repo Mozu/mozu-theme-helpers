@@ -8,36 +8,36 @@ var zubat = _interopRequire(require("zubat"));
 
 var colors = _interopRequire(require("colors"));
 
+var slug = _interopRequire(require("slug"));
+
 var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
 
 var metadata = _interopRequire(require("../utils/metadata"));
 
 var compile = function compile(opts, log, cb) {
-  var dir = opts.dir;
-  var manualancestry = opts.manualancestry;
-  var _opts$ignore = opts.ignore;
-  var ignore = _opts$ignore === undefined ? [] : _opts$ignore;
-  var _opts$logLevel = opts.logLevel;
-  var logLevel = _opts$logLevel === undefined ? 2 : _opts$logLevel;
 
-  var themeDir = getThemeDir(dir);
+  opts.ignore = opts.ignore || [];
 
-  if (themeDir) {
+  var themeDir = getThemeDir(opts.dir);
+
+  if (!themeDir) {
     return log.fail("Not inside a theme directory. Please supply a theme directory to compile.");
   }
 
   var base = metadata.read(themeDir, "theme").about["extends"];
 
-  if (base) manualancestry = [path.resolve(themeDir, "references", base)];
+  if (base) opts.manualancestry = [path.resolve(themeDir, "references", slug(base))];
 
-  ignore.push("/references", "\\.git", "node_modules", "^/resources", "^/tasks", "\\.zip$");
+  opts.ignore.push("/references", "\\.git", "node_modules", "^/resources", "^/tasks", "\\.zip$");
 
   var job = zubat(themeDir, opts, function (err) {
+    console.log("ack");
     if (!err) log.info("Theme compilation complete.");
     cb(err);
   });
 
   job.on("log", function (str, sev) {
+    console.log("pth");
     switch (sev) {
       case "error":
         job.cleanup(function () {

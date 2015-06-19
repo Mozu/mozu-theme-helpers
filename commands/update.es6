@@ -1,10 +1,13 @@
 import path from "path";
 import fs from "fs";
 import rimraf from "rimraf";
-import extractTarballStream from "../utils/extract-tarball-stream";
+import mkdirp from "mkdirp";
+import zlib from "zlib";
+import tar from "tar";
 import getThemeDir from "../utils/get-theme-dir";
 import metadata from "../utils/metadata";
 import getGithubResource from "../utils/get-github-resource";
+import slug from "slug";
 import getLatestGithubRelease from "../utils/get-latest-github-release";
 
 let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }, log, cb) {
@@ -32,51 +35,51 @@ let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }
   let refDir = path.resolve(themeDir, 'references', slug(themeName));
 
   rimraf(refDir, function(err) {
-
-    fs.mkdirSync(refDir);
     if (err) return cb(err);
+    mkdirp(refDir, function(err) {
+      if (err) return cb(err);
 
-    getLatestGithubRelease(repo, { cache: cache }).then(function(release) {
-      let releaseUrl = release.tarball_url.replace('https://api.github.com', '');
+      getLatestGithubRelease(repo, { cache: cache }).then(function(release) {
+        let releaseUrl = release.tarball_url.replace('https://api.github.com', '');
 
-      let tarballStream = getGithubResource({
-        pathname: releaseUrl
-      }, { cache: cache });
+        let tarballStream = getGithubResource({
+          pathname: releaseUrl
+        }, { cache: cache });
 
-      tarballStream.on('error', cb);
+        tarballStream.on('error', cb);
 
-      let fileStream = tarballStream.pipe(extractTarballStream({ dir: refDir, strip: 1}));
+        let fileStream = tarballStream.pipe(zlib.createGunzip()).pipe(tar.Extract({ path: refDir, strip: 1}));
 
-      fileStream.on('error', cb);
+        fileStream.on('error', cb);
 
-      fileStream.on('end', function() {
-        (function walk(referenceDir, templatedir) {
-          var inheritedDir, fileList = fs.readdirSync(referenceDir).map(function(filename) {
-            if (ignore[filename]) return false;
-            let stats = fs.statSync(path.resolve(referenceDir, filename));
-            if (stats.isDirectory()) {
-              let dir = path.resolve(templatedir, filename);
-              if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-              walk(path.resolve(referenceDir, filename), dir);
-              return false;
-            } else if (stats.isFile() && !fs.existsSync(path.resolve(templatedir, filename))) {
-              return filename;
+        fileStream.on('end', function() {
+          (function walk(referenceDir, templatedir) {
+            var inheritedDir, fileList = fs.readdirSync(referenceDir).map(function(filename) {
+              // if (ignore[filename]) return false;
+              let stats = fs.statSync(path.resolve(referenceDir, filename));
+              if (stats.isDirectory()) {
+                let dir = path.resolve(templatedir, filename);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+                walk(path.resolve(referenceDir, filename), dir);
+                return false;
+              } else if (stats.isFile() && !fs.existsSync(path.resolve(templatedir, filename))) {
+                return filename;
+              }
+            }).filter(function(x) { return x; });
+
+            if (fileList.length > 0) {
+              fs.writeFileSync(path.resolve(templatedir, '.inherited'), fileList.join('\n'));
             }
-          }).filter(function(x) { return x; });
+          })(refDir, themeDir);
 
-          if (fileList.length > 0) {
-            fs.writeFileSync(path.resolve(templatedir, '.inherited'), fileList.join('\n'));
-          }
-        })(refDir, themeDir);
+          log.info("Base theme update complete.");
+          cb(null, "Base theme update complete.");
 
-        log.info("Base theme update complete.");
-        cb(null, "Base theme update complete.");
+        })
 
-      })
-
-    }, cb);
+      }).catch(cb);
+    });
   });
-
 };
 
 update.transformArguments = function({ options, _args }) {
