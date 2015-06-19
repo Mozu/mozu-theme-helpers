@@ -4,14 +4,15 @@ module.exports = function(grunt) {
   grunt.initConfig({
     babel: {
       options: {
-          modules: 'common'
+          modules: 'common',
+          optional: ['runtime']
       },
       dist: {
         files: [
           {
             expand: true,     // Enable dynamic expansion.
             cwd: './',      // Src matches are relative to this path.
-            src: ['**/*.es6'], // Actual pattern(s) to match.
+            src: ['**/*.es6', '!node_modules/**'], // Actual pattern(s) to match.
             dest: './',   // Destination path prefix.
             ext: '.js',   // Dest filepaths will have this extension.
             extDot: 'first'   // Extensions in filenames begin after the first dot
@@ -21,7 +22,7 @@ module.exports = function(grunt) {
     },
     watch: {
       babel: {
-        files: ['**/*.es6'],
+        files: ['**/*.es6', '!./node_modules/**'],
         tasks: ['babel']
       }
     }

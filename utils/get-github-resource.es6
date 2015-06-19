@@ -52,8 +52,10 @@ export default function getGithubResource({ pathname, cache = true }) {
       fileContentsStream.pipe(outStream);
     } else {
       if (cacheFile && fileContentsStream) rimraf.sync(path.join(cacheDir, cacheFile));
+      let newCacheFileName = path.join(cacheDir, 'etag-' + res.headers.etag.replace(/"/g,''));
       mkdirp.sync(cacheDir);
-      req.pipe(fs.createWriteStream(path.join(cacheDir, 'etag-' + res.headers.etag.replace(/"/g,'')))).on('end', function() {
+      req.pipe(fs.createWriteStream(newCacheFileName)).on('end', function() {
+        fs.chmodSync(newCacheFileName, '666');
         if (process.env.DEBUG && process.env.DEBUG.indexOf('thmaa') !== -1) console.log('cache complete');
       })
       req.pipe(outStream);

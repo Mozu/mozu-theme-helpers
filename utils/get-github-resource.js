@@ -1,6 +1,6 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequire = require("babel-runtime/helpers/interop-require")["default"];
 
 module.exports = getGithubResource;
 
@@ -67,12 +67,16 @@ function getGithubResource(_ref) {
     } else if (res.statusCode === 304) {
       fileContentsStream.pipe(outStream);
     } else {
-      if (cacheFile && fileContentsStream) rimraf.sync(path.join(cacheDir, cacheFile));
-      mkdirp.sync(cacheDir);
-      req.pipe(fs.createWriteStream(path.join(cacheDir, "etag-" + res.headers.etag.replace(/"/g, "")))).on("end", function () {
-        if (process.env.DEBUG && process.env.DEBUG.indexOf("thmaa") !== -1) console.log("cache complete");
-      });
-      req.pipe(outStream);
+      (function () {
+        if (cacheFile && fileContentsStream) rimraf.sync(path.join(cacheDir, cacheFile));
+        var newCacheFileName = path.join(cacheDir, "etag-" + res.headers.etag.replace(/"/g, ""));
+        mkdirp.sync(cacheDir);
+        req.pipe(fs.createWriteStream(newCacheFileName)).on("end", function () {
+          fs.chmodSync(newCacheFileName, "666");
+          if (process.env.DEBUG && process.env.DEBUG.indexOf("thmaa") !== -1) console.log("cache complete");
+        });
+        req.pipe(outStream);
+      })();
     }
   });
 

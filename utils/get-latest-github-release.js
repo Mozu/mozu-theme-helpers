@@ -1,6 +1,8 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _core = require("babel-runtime/core-js")["default"];
+
+var _interopRequire = require("babel-runtime/helpers/interop-require")["default"];
 
 var getGithubReleases = _interopRequire(require("./get-github-releases"));
 
@@ -14,7 +16,7 @@ module.exports = function (repo, _ref) {
   var _ref$cache = _ref.cache;
   var cache = _ref$cache === undefined ? true : _ref$cache;
 
-  return new Promise(function (resolve, reject) {
+  return new _core.Promise(function (resolve, reject) {
     var releaseStream = getGithubReleases(repo, { versionRange: versionRange, cache: cache });
     releaseStream.on("error", reject);
     releaseStream.pipe(concat(function (releases) {
