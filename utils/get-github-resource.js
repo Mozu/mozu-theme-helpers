@@ -10,7 +10,7 @@ var fs = _interopRequire(require("fs"));
 
 var request = _interopRequire(require("request"));
 
-var slug = _interopRequire(require("slug"));
+var slug = _interopRequire(require("./slug"));
 
 var stream = _interopRequire(require("stream"));
 

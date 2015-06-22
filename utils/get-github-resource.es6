@@ -3,7 +3,7 @@
 import path from "path";
 import fs from "fs";
 import request from "request";
-import slug from "slug";
+import slug from "./slug";
 import stream from "stream";
 import rimraf from "rimraf";
 // import tunnelAgent from "tunnel-agent";

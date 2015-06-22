@@ -7,7 +7,7 @@ import tar from "tar";
 import getThemeDir from "../utils/get-theme-dir";
 import metadata from "../utils/metadata";
 import getGithubResource from "../utils/get-github-resource";
-import slug from "slug";
+import slug from "../utils/slug";
 import getLatestGithubRelease from "../utils/get-latest-github-release";
 
 let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }, log, cb) {

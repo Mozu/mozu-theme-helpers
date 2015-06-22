@@ -8,7 +8,7 @@ var zubat = _interopRequire(require("zubat"));
 
 var colors = _interopRequire(require("colors"));
 
-var slug = _interopRequire(require("slug"));
+var slug = _interopRequire(require("../utils/slug"));
 
 var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
 

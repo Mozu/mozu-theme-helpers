@@ -3,7 +3,7 @@ import os from "os";
 import fs from "fs";
 import colors from "colors";
 import semver from "semver";
-import slug from "slug";
+import slug from "../utils/slug";
 import getThemeDir from "../utils/get-theme-dir";
 import metadataHandler from "../utils/metadata";
 import getLatestGithubRelease from "../utils/get-latest-github-release";

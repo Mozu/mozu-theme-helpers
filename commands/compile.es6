@@ -1,7 +1,7 @@
 import path from "path";
 import zubat from "zubat";
 import colors from "colors";
-import slug from "slug";
+import slug from "../utils/slug";
 import getThemeDir from "../utils/get-theme-dir";
 import metadata from "../utils/metadata";
 

@@ -1,33 +1,17 @@
 import { EventEmitter } from "events";
 
-class Logger extends EventEmitter {
-  constructor(config, callback) {
-    this.config = config;
-    this.callback = callback;
-  }
-  info(str) {
-    this.emit('info', str);
-    return this;
-  }
-  warn(str) {
-    this.emit('warn', str);
-    return this;
-  }
-  fail(str) {
-    this.emit('fail', str);
+export default function createLogger(config, callback) {
+  var l = new EventEmitter();
+  l.info = (str) => l.emit('info', str);
+  l.warn = (str) => l.emit('warn', str);
+  l.fail = (str) => {
+    l.emit('fail', str);
     var err = new Error(str);
-    if (this.callback) {
-      process.nextTick(() => this.callback(err))
-    } else if (this.config.debug) {
+    if (callback) {
+      setImmediate(callback.bind(err));
+    } else {
       throw err;
     }
-    return this;
-  }
+  };
+  return l;
 }
-
-
-function createLogger(config, callback) {
-  return new Logger(config, callback);
-}
-
-export default createLogger;

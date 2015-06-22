@@ -12,7 +12,7 @@ var colors = _interopRequire(require("colors"));
 
 var semver = _interopRequire(require("semver"));
 
-var slug = _interopRequire(require("slug"));
+var slug = _interopRequire(require("../utils/slug"));
 
 var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
 

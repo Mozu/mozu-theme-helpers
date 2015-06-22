@@ -20,7 +20,7 @@ var metadata = _interopRequire(require("../utils/metadata"));
 
 var getGithubResource = _interopRequire(require("../utils/get-github-resource"));
 
-var slug = _interopRequire(require("slug"));
+var slug = _interopRequire(require("../utils/slug"));
 
 var getLatestGithubRelease = _interopRequire(require("../utils/get-latest-github-release"));
 
