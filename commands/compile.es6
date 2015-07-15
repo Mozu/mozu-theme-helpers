@@ -22,7 +22,6 @@ var compile = function(opts, log, cb) {
   opts.ignore.push('/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$');
 
   var job = zubat(themeDir, opts, err => {
-    console.log('ack');
     if (!err) log.info("Theme compilation complete.");
     cb(err);
   });
