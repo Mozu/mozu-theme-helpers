@@ -30,8 +30,7 @@ var update = function update(_ref, log, cb) {
   var themeName = _ref.themeName;
   var _ref$cache = _ref.cache;
   var cache = _ref$cache === undefined ? true : _ref$cache;
-  var _ref$versionRange = _ref.versionRange;
-  var versionRange = _ref$versionRange === undefined ? "*" : _ref$versionRange;
+  var versionRange = _ref.versionRange;
 
   var themeDir = getThemeDir(dir);
 
@@ -44,6 +43,7 @@ var update = function update(_ref, log, cb) {
     var theme = metadata.read(themeDir, "theme");
     repo = pkg.config.baseThemeRepo;
     themeName = pkg.config.baseTheme;
+    versionRange = versionRange || pkg.config.baseThemeVersion;
     if (theme.about["extends"] !== pkg.config.baseTheme) {
       return cb(new Error("Theme extends " + theme.about["extends"] + " but package.json instead refers to a repo for " + pkg.config.baseTheme + "."));
     }
@@ -60,7 +60,7 @@ var update = function update(_ref, log, cb) {
     mkdirp(refDir, function (err) {
       if (err) return cb(err);
 
-      getLatestGithubRelease(repo, { cache: cache }).then(function (release) {
+      getLatestGithubRelease(repo, { cache: cache, versionRange: versionRange || "*" }).then(function (release) {
         var releaseUrl = release.tarball_url.replace("https://api.github.com", "");
 
         var tarballStream = getGithubResource({

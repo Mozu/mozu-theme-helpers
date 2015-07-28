@@ -10,7 +10,7 @@ import getGithubResource from "../utils/get-github-resource";
 import slug from "../utils/slug";
 import getLatestGithubRelease from "../utils/get-latest-github-release";
 
-let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }, log, cb) {
+let update = function({ dir, repo, themeName, cache = true, versionRange }, log, cb) {
 
   let themeDir = getThemeDir(dir);
 
@@ -23,6 +23,7 @@ let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }
     let theme = metadata.read(themeDir, 'theme');
     repo = pkg.config.baseThemeRepo;
     themeName = pkg.config.baseTheme;
+    versionRange = versionRange || pkg.config.baseThemeVersion;
     if (theme.about.extends !== pkg.config.baseTheme) {
       return cb(new Error(`Theme extends ${theme.about.extends} but package.json instead refers to a repo for ${pkg.config.baseTheme}.`));
     }
@@ -39,7 +40,7 @@ let update = function({ dir, repo, themeName, cache = true, versionRange = "*" }
     mkdirp(refDir, function(err) {
       if (err) return cb(err);
 
-      getLatestGithubRelease(repo, { cache: cache }).then(function(release) {
+      getLatestGithubRelease(repo, { cache, versionRange: versionRange || '*' }).then(function(release) {
         let releaseUrl = release.tarball_url.replace('https://api.github.com', '');
 
         let tarballStream = getGithubResource({

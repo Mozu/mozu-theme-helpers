@@ -66,15 +66,6 @@ npm install -g thmaa
     --forcewidth <n>                      Force display at a certain number of 
                                           columns. Defaults to terminal width.
 
-  set-version <path> <version>            Set and synchronize the version number 
-                                          across all config files.
-                                          
-    --no-package                          Do not update package.json.
-
-                                          
-    --no-bower                            Do not update bower.json.
-
-
   update <path>                           Update base theme in references folder.
                                           
     --no-cache                            Skip the local cache. This results in a 
