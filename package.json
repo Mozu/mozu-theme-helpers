@@ -39,7 +39,7 @@
     "semver": "^4.1.0",
     "tar": "^1.0.3",
     "tunnel-agent": "^0.4.0",
-    "zubat": "^0.3.0"
+    "zubat": "^0.4.2"
   },
   "license": "MIT",
   "devDependencies": {
