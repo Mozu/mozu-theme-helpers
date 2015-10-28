@@ -1,24 +1,20 @@
 "use strict";
 
+var _slicedToArray = require("babel-runtime/helpers/sliced-to-array")["default"];
+
+var _core = require("babel-runtime/core-js")["default"];
+
 var _interopRequire = require("babel-runtime/helpers/interop-require")["default"];
 
-var path = _interopRequire(require("path"));
-
-var os = _interopRequire(require("os"));
-
-var fs = _interopRequire(require("fs"));
-
 var colors = _interopRequire(require("colors"));
-
-var semver = _interopRequire(require("semver"));
-
-var slug = _interopRequire(require("../utils/slug"));
 
 var getThemeDir = _interopRequire(require("../utils/get-theme-dir"));
 
 var metadataHandler = _interopRequire(require("../utils/metadata"));
 
-var getLatestGithubRelease = _interopRequire(require("../utils/get-latest-github-release"));
+var git = _interopRequire(require("../utils/git"));
+
+var gitFetchRemoteTags = _interopRequire(require("../utils/git-fetch-remote-tags"));
 
 var check = function check(_ref, log, cb) {
   var dir = _ref.dir;
@@ -27,44 +23,53 @@ var check = function check(_ref, log, cb) {
 
   var themeDir = getThemeDir(dir);
 
-  if (!themeDir) {
-    return cb(new Error("Not inside theme directory. Please supply a theme directory for reference check."));
-  }
-
   var pkg = metadataHandler.read(themeDir, "package");
   var theme = metadataHandler.read(themeDir, "theme");
 
-  if (theme.about["extends"] !== pkg.config.baseTheme) {
-    return cb(new Error("Theme extends " + theme.about["extends"] + " but package.json instead refers to a repo for " + pkg.config.baseTheme + "."));
+  if (theme.about["extends"]) {
+    return cb(new Error("Themes that use the `about.extends` legacy option " + "are not compatible with this version of the " + "theme helpers."));
   }
 
-  if (!pkg.config.baseThemeRepo) {
-    return cb(new Error("No theme repo specified; cannot check for updates."));
-  }
+  var gopts = {
+    logger: function (x) {
+      return log.info(x);
+    },
+    quiet: true
+  };
 
-  var baseThemeDir = path.join(themeDir, "references", slug(pkg.config.baseTheme));
-  if (!fs.existsSync(path.join(baseThemeDir, "package.json"))) {
-    return cb(new Error("A reference directory or package.json for " + pkg.config.baseTheme + " does not exist in ./references, so it cannot be updated."));
-  }
+  var prerelease = theme.about.baseThemeChannel === "prerelease";
 
-  var currentBaseThemeVersion = metadataHandler.read(baseThemeDir, "package").version;
-
-  getLatestGithubRelease(pkg.config.baseThemeRepo, { cache: cache }).then(function (release) {
-    if (!release) {
-      return cb(new Error("No releases found in " + pkg.config.baseThemeRepo));
-    }
-    var latest = semver.clean(release.tag_name);
-    if (semver.gt(latest, currentBaseThemeVersion)) {
-      if (semver.satisfies(latest, pkg.config.baseThemeVersion)) {
-        cb(new Error(("\nYour theme extends " + theme.about["extends"] + ", and its repository,\n" + pkg.config.baseThemeRepo + ", has reported a newer version!\nUse your build tools (`grunt updatereferences`) to update\nyour local references from " + pkg.config.baseThemeVersion + " \nto " + latest + ", and check the repository for release notes.").replace(/\n/g, " ").bold));
-      } else if (semver.ltr(latest, pkg.config.baseThemeVersion)) {
-        cb(new Error(("\nNo available version of " + theme.about["extends"] + " satisfies your specified\nversion range " + pkg.config.baseThemeVersion + ". The newest available \nversion is " + latest + ".").replace(/\n/g, " ").bold));
-      } else {
-        log.info(("A version of " + theme.about["extends"] + " is available that is newer than\nyour specified version range " + pkg.config.baseThemeVersion + ". Visit\nthe repository homepage " + pkg.config.baseThemeRepo + " for details.").replace(/\n/g, " "));
-        cb(null);
-      }
+  git("remote show basetheme", "Checking if base theme remote exists...", gopts)["catch"](function () {
+    if (!theme.about.baseTheme) {
+      return cb(new Error("No theme repo specified; cannot check for updates."));
     } else {
-      log.info("Current version of base theme " + pkg.config.baseTheme + ", " + latest + ", is the latest.");
+      return git("remote add basetheme " + theme.about.baseTheme, "Base theme specified in theme.json. Adding remote to " + "git repository", gopts);
+    }
+  }).then(function () {
+    return git("config remote.basetheme.tagopt --no-tags", "Ensuring that no tags are downloaded from base theme", gopts);
+  }).then(function () {
+    return git("remote update basetheme", "Updating basetheme remote", gopts);
+  }).then(function () {
+    return _core.Promise.all([gitFetchRemoteTags({ prerelease: prerelease, logger: gopts.logger }), git("merge-base master basetheme/master", "Getting most recently merged basetheme commit", gopts)]);
+  }).then(function (_ref2) {
+    var _ref22 = _slicedToArray(_ref2, 2);
+
+    var remoteTags = _ref22[0];
+    var mergeBase = _ref22[1];
+
+    mergeBase = mergeBase.trim();
+    var tagIndex = remoteTags.reduce(function (target, tag, i) {
+      return tag.commit === mergeBase ? i : target;
+    }, -1);
+    if (tagIndex === -1) {
+      log.warn("No merge base found among tags! You may have merged an " + "unreleased commit.");
+    }
+    var newVersions = remoteTags.slice(0, tagIndex).map(function (t) {
+      return "" + t.version.bold.yellow + " (commit: " + t.commit + ")";
+    });
+    if (newVersions.length > 0) {
+      log.warn("\nThere are new versions available! \n\n".green.bold + newVersions.join("\n") + "\n\nTo merge a new version, run `git merge <commit>`, where " + "<commit> is the commit ID corresponding to the version you " + "would like to begin to merge.\n");
+      log.warn(("You cannot merge the tag directly, because the default " + "configuration does not fetch tags from the base theme " + "repository, to avoid conflicts with your own tags.").gray);
       cb(null);
     }
   })["catch"](cb);
@@ -80,10 +85,8 @@ check.transformArguments = function (_ref) {
 
 check._doc = {
   args: "<path>",
-  description: "Check if references are up to date.",
-  options: {
-    "--no-cache": "Skip the local cache. This results in a call out to the remote repository every time, instead of relying on cache."
-  }
+  description: "Check for new versions of the base theme..",
+  options: {}
 };
 
 module.exports = check;

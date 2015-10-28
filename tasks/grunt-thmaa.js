@@ -18,6 +18,7 @@ module.exports = function(grunt) {
       grunt.fail.warn('Unrecognized mozutheme command `' + target + '`.');
       return false;
     }
+    grunt.verbose.ok('Recognized command ' + target);
     if (typeof opts === "function") {
       opts(run);
     } else {
@@ -29,7 +30,9 @@ module.exports = function(grunt) {
         return false;
       }
       try {
-        thmaa(target, opts, done).on('info', grunt.log.ok.bind(grunt.log));
+        thmaa(target, opts, done)
+          .on('info', grunt.log.oklns.bind(grunt.log))
+          .on('warn', grunt.log.writelns.bind(grunt.log));
       } catch(e) {
         grunt.fail.warn(e.message);
       }

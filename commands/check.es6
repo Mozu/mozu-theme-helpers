@@ -1,69 +1,83 @@
-import path from "path";
-import os from "os";
-import fs from "fs";
 import colors from "colors";
-import semver from "semver";
-import slug from "../utils/slug";
 import getThemeDir from "../utils/get-theme-dir";
 import metadataHandler from "../utils/metadata";
-import getLatestGithubRelease from "../utils/get-latest-github-release";
+import git from "../utils/git";
+import gitFetchRemoteTags from '../utils/git-fetch-remote-tags';
 
 let check = function({ dir, cache = true}, log, cb) {
 
   let themeDir = getThemeDir(dir);
 
-  if (!themeDir) {
-    return cb(new Error("Not inside theme directory. Please supply a theme directory for reference check."));
-  }
-
   let pkg = metadataHandler.read(themeDir, 'package');
   let theme = metadataHandler.read(themeDir, 'theme');
 
-  if (theme.about.extends !== pkg.config.baseTheme) {
-    return cb(new Error(`Theme extends ${theme.about.extends} but package.json instead refers to a repo for ${pkg.config.baseTheme}.`));
+  if (theme.about.extends) {
+    return cb(new Error('Themes that use the `about.extends` legacy option ' +
+                        'are not compatible with this version of the ' +
+                        'theme helpers.'));
   }
 
-  if (!pkg.config.baseThemeRepo) {
-    return cb(new Error("No theme repo specified; cannot check for updates."));
-  }
+  let gopts = {
+    logger: x => log.info(x),
+    quiet: true
+  };
 
-  let baseThemeDir = path.join(themeDir, 'references', slug(pkg.config.baseTheme));
-  if (!fs.existsSync(path.join(baseThemeDir, 'package.json'))) {
-    return cb(new Error(`A reference directory or package.json for ${pkg.config.baseTheme} does not exist in ./references, so it cannot be updated.`));
-  }
+  let prerelease = theme.about.baseThemeChannel === 'prerelease';
 
-  let currentBaseThemeVersion = metadataHandler.read(baseThemeDir, 'package').version;
 
-  getLatestGithubRelease(pkg.config.baseThemeRepo, { cache: cache }).then(function(release) {
-    if (!release) {
-      return cb(new Error("No releases found in " + pkg.config.baseThemeRepo));
-    }
-    let latest = semver.clean(release.tag_name);
-    if (semver.gt(latest, currentBaseThemeVersion)) {
-      if (semver.satisfies(latest, pkg.config.baseThemeVersion)) {
-        cb(new Error(`
-Your theme extends ${theme.about.extends}, and its repository,
-${pkg.config.baseThemeRepo}, has reported a newer version!
-Use your build tools (\`grunt updatereferences\`) to update
-your local references from ${pkg.config.baseThemeVersion} 
-to ${latest}, and check the repository for release notes.`.replace(/\n/g,' ').bold));
-      } else if (semver.ltr(latest, pkg.config.baseThemeVersion)) {
-        cb(new Error(`
-No available version of ${theme.about.extends} satisfies your specified
-version range ${pkg.config.baseThemeVersion}. The newest available 
-version is ${latest}.`.replace(/\n/g,' ').bold));
+  git('remote show basetheme', 'Checking if base theme remote exists...',
+    gopts)
+  .catch(
+    () => {
+      if (!theme.about.baseTheme) {
+        return cb(
+          new Error("No theme repo specified; cannot check for updates."));
       } else {
-        log.info(
-`A version of ${theme.about.extends} is available that is newer than
-your specified version range ${pkg.config.baseThemeVersion}. Visit
-the repository homepage ${pkg.config.baseThemeRepo} for details.`.replace(/\n/g,' '));
-        cb(null);
+        return git('remote add basetheme ' + theme.about.baseTheme,
+          'Base theme specified in theme.json. Adding remote to ' +
+          'git repository', gopts);
       }
-    } else {
-      log.info(`Current version of base theme ${pkg.config.baseTheme}, ${latest}, is the latest.`);
-      cb(null);
     }
-  }).catch(cb);
+  )
+  .then(
+    () => git('config remote.basetheme.tagopt --no-tags',
+              'Ensuring that no tags are downloaded from base theme', gopts)
+  )
+  .then(
+    () => git('remote update basetheme', 'Updating basetheme remote', gopts)
+  )
+  .then(
+    () => Promise.all([
+      gitFetchRemoteTags({ prerelease, logger: gopts.logger }),
+      git('merge-base master basetheme/master',
+          'Getting most recently merged basetheme commit', gopts)
+    ])
+  ).then(
+    ([remoteTags, mergeBase]) => {
+      mergeBase = mergeBase.trim();
+      let tagIndex = remoteTags.reduce(
+        (target, tag, i) => {
+          return (tag.commit === mergeBase) ? i : target;
+        }, -1);
+      if (tagIndex === -1) {
+        log.warn('No merge base found among tags! You may have merged an ' +
+            'unreleased commit.');
+      }
+      let newVersions = remoteTags.slice(0, tagIndex)
+          .map(t => `${t.version.bold.yellow} (commit: ${t.commit})`);
+      if (newVersions.length > 0) {
+        log.warn('\nThere are new versions available! \n\n'.green.bold + 
+                 newVersions.join('\n') +
+            '\n\nTo merge a new version, run `git merge <commit>`, where ' +
+            '<commit> is the commit ID corresponding to the version you ' +
+            'would like to begin to merge.\n');
+        log.warn(('You cannot merge the tag directly, because the default ' +
+                 'configuration does not fetch tags from the base theme ' +
+                 'repository, to avoid conflicts with your own tags.').gray);
+            cb(null);
+      }
+    }
+  ).catch(cb);
 
 };
 
@@ -74,9 +88,8 @@ check.transformArguments = function({ options, _args }) {
 
 check._doc = {
   args: "<path>",
-  description: "Check if references are up to date.",
+  description: "Check for new versions of the base theme..",
   options: {
-    '--no-cache': 'Skip the local cache. This results in a call out to the remote repository every time, instead of relying on cache.'
   }
 };
 
