@@ -12,14 +12,14 @@
     "thmaa": "./bin/thmaa"
   },
   "scripts": {
-    "prepublish": "grunt && node ./resources/build.js"
+    "preversion": "grunt && node ./resources/build.js && git add -A"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mozu/thmaa"
+    "url": "https://github.com/mozu/mozu-theme-helpers"
   },
   "bugs": {
-    "url": "https://github.com/mozu/thmaa/issues"
+    "url": "https://github.com/mozu/mozu-theme-helpers/issues"
   },
   "keywords": [
     "mozu",
@@ -28,23 +28,23 @@
   ],
   "dependencies": {
     "JSONStream": "^1.0.4",
-    "babel-runtime": "^5.6.3",
-    "colors": "^1.0.3",
+    "babel-runtime": "^5.8.29",
+    "colors": "^1.1.2",
     "concat-stream": "^1.4.7",
     "minimist": "^1.1.0",
     "mkdirp": "^0.5.1",
-    "multipipe": "^0.1.2",
+    "multipipe": "^0.2.1",
     "request": "^2.58.0",
     "rimraf": "^2.2.8",
-    "semver": "^4.1.0",
-    "tar": "^1.0.3",
+    "semver": "^5.0.3",
+    "tar": "^2.2.1",
     "tunnel-agent": "^0.4.0",
     "zubat": "^0.4.2"
   },
   "license": "MIT",
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-babel": "^4.0.0",
+    "grunt-babel": "^5.0.3",
     "grunt-contrib-watch": "^0.6.1"
   }
 }
