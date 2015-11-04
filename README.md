@@ -34,11 +34,7 @@ npm install -g thmaa
                                                                                          
   The <path> parameter defaults to the current directory.                                
                                                                                          
-  check <path>                            Check if references are up to date.
-                                          
-    --no-cache                            Skip the local cache. This results in a 
-                                          call out to the remote repository every 
-                                          time, instead of relying on cache.
+  check <path>                            Check for new versions of the base theme..
 
   compile <path>                          Compile theme scripts, respecting 
                                           inheritance.
