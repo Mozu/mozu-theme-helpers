@@ -1,6 +1,6 @@
 {
   "name": "mozu-theme-helpers",
-  "version": "0.10.5",
+  "version": "1.0.0",
   "author": "Volusion Inc.",
   "contributors": [
     {
@@ -14,7 +14,9 @@
     "preversion": "npm run babel"
   },
   "babel": {
-    "presets": ["es2015"]
+    "presets": [
+      "es2015"
+    ]
   },
   "main": "./lib/index.js",
   "repository": {
