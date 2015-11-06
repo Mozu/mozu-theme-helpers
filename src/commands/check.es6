@@ -1,5 +1,6 @@
 'use strict';
 import chalk from "chalk";
+import semver from "semver";
 import getThemeDir from "../utils/get-theme-dir";
 import metadataHandler from "../utils/metadata";
 import git from "../utils/git";
@@ -45,28 +46,74 @@ let check = function(task, { dir }) {
     () => git('remote update basetheme', 'Updating basetheme remote', gopts)
   )
   .then(
-    () => Promise.all([
-      gitFetchRemoteTags({ prerelease, logger: gopts.logger }),
-      git('merge-base master basetheme/master',
+    () => git('merge-base master basetheme/master',
           'Getting most recently merged basetheme commit', gopts)
-    ])
-  ).then(
-    ([remoteTags, mergeBase]) => {
-      mergeBase = mergeBase.trim();
-      let tagIndex = remoteTags.reduce(
-        (target, tag, i) => {
-          return (tag.commit === mergeBase) ? i : target;
-        }, -1);
-      if (tagIndex === -1) {
-        task.warn('No merge base found among tags! You may have merged an ' +
-            'unreleased commit.');
+  )
+  .then(
+    mergeBase => git(
+      `--no-pager log --date=iso-strict --pretty=%ad||||%H||||%s ` +
+      `${mergeBase.trim()}..basetheme/master`,
+      `Getting all commits since most recent merge base`, gopts
+    )
+  )
+  .then(
+    newCommitsRaw =>
+      newCommitsRaw
+      .split('\n')
+      .filter(line => !!line.trim())
+      .map(line => {
+        let parts = line.split('||||').map(p => p.trim());
+        if (parts.length > 3) {
+          // must have had a delimiter char in the commit message. fix it:
+          parts = [parts[0],parts[2],parts.slice(2).join('||||')];
+        }
+        return {
+          date: new Date(parts[0]),
+          commit: parts[1],
+          name: parts[2]
+        };
+      })
+  )
+  .then(
+    allNewCommits => {
+      if (prerelease) {
+        task.warn('This theme is configured in `theme.json` to be connected ' +
+                  'to the "prerelease" channel of its base theme. This means ' +
+                  'that its build process will notify about any new commits ' +
+                  'in the base theme, instead of just any new versions.');
+        return allNewCommits;
+      } else {
+        return gitFetchRemoteTags({ prerelease, logger: gopts.logger })
+          .then(
+            remoteTags => allNewCommits.filter(c =>
+              remoteTags.some(t => t.commit === c.commit))
+          )
       }
-      let newVersions = remoteTags.slice(0, tagIndex)
-          .map(t => `${chalk.bold.yellow(t.version)} (commit: ${t.commit})`);
-      if (newVersions.length > 0) {
+  })
+  .then(
+    newCommits =>  {
+      let normalizeDateLength = (s, l) => {
+        while (s.length < l) s += ' ';
+        return s;
+      }
+      if (newCommits.length > 0) {
+        let formattedCommits =
+          newCommits
+          .map(t => 
+               chalk.cyan(normalizeDateLength(t.date.toLocaleString(), 23)) + 
+               `  ${chalk.bold.yellow(t.name)} (commit: ${t.commit.slice(0,9)})`);
+        if (prerelease) {
+          task.warn(chalk.green.bold(`\nThis theme is ${newCommits.length} ` +
+            `commits behind its base theme.`) +
+              `\n\n##  Unmerged commits: \n\n` +
+              formattedCommits.join('\n') +
+              chalk.green.bold(`\n\n Run \`git merge basetheme/master\` to ` +
+                                `merge these commits.`));
+
+        } else {
         task.warn(
             chalk.green.bold('\nThere are new versions available! \n\n') + 
-                 newVersions.join('\n') +
+                 formattedCommits.join('\n') +
             '\n\nTo merge a new version, run `git merge <commit>`, where ' +
             '<commit> is the commit ID corresponding to the version you ' +
             'would like to begin to merge.\n');
@@ -74,10 +121,10 @@ let check = function(task, { dir }) {
           chalk.gray('You cannot merge the tag directly, because the default ' +
                  'configuration does not fetch tags from the base theme ' +
                  'repository, to avoid conflicts with your own tags.'));
-        task.done();
       }
     }
-  ).catch(task.fail);
+    task.done();
+  }).catch(task.fail);
 
   return task;
 
