@@ -32,7 +32,7 @@ module.exports = function(grunt) {
       let helper = runHelper(target, opts);
       helper.on('info', x => grunt.log.oklns(x));
       helper.on('warn', x => grunt.log.writelns(x));
-      helper.on('error', x => grunt.fail.warn(x.message + '\n\n' +x.stack));
+      helper.on('error', x => grunt.fail.warn(x));
       helper.on('done', done);
     }
   });

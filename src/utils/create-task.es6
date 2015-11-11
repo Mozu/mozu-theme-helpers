@@ -5,7 +5,14 @@ export default function createTask() {
   l.info = str => l.emit('info', str);
   l.warn = str => l.emit('warn', str);
   l.fail = str => {
-    l.emit('error', new Error(`mozu-theme-helpers: ${str}`));
+    let msg = 'mozu-theme-helpers: '
+    if (str && str.message) {
+      msg += str.message;
+    }
+    if (str && str.stack) {
+      msg += "\n" + str.stack;
+    }
+    l.emit('error', new Error(msg));
   };
   l.done = x => l.emit('done', x);
   return l;

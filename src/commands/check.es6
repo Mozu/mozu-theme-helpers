@@ -6,7 +6,7 @@ import metadataHandler from "../utils/metadata";
 import git from "../utils/git";
 import gitFetchRemoteTags from '../utils/git-fetch-remote-tags';
 
-let check = function(task, { dir }) {
+let check = function(task, { dir, channelOverride }) {
 
   let themeDir = getThemeDir(dir);
 
@@ -23,7 +23,9 @@ let check = function(task, { dir }) {
     quiet: true
   };
 
-  let prerelease = theme.about.baseThemeChannel === 'prerelease';
+  let channel = channelOverride || theme.about.baseThemeChannel;
+  let fallbackCommit = theme.about.baseThemeVersion &&
+    theme.about.baseThemeVersion.commit;
 
   git('remote show basetheme', 'Checking if base theme remote exists...',
     gopts)
@@ -49,6 +51,14 @@ let check = function(task, { dir }) {
     () => git('merge-base master basetheme/master',
           'Getting most recently merged basetheme commit', gopts)
   )
+  .catch(() => {
+    if (!fallbackCommit) {
+      throw new Error('Could not find a merge base with the base theme ' +
+                      'repository, or a baseThemeVersion specified in ' +
+                      'theme.json. Please check your `basetheme` remote.');
+    }
+    return fallbackCommit;
+  })
   .then(
     mergeBase => git(
       `--no-pager log --date=iso-strict --pretty=%ad||||%H||||%s ` +
@@ -67,24 +77,35 @@ let check = function(task, { dir }) {
           // must have had a delimiter char in the commit message. fix it:
           parts = [parts[0],parts[2],parts.slice(2).join('||||')];
         }
+        let versionName = parts[2];
+        if (channel !== 'edge') {
+          let match = channel === "edge" ? parts[2] : parts[2].match(
+            /\b\d+\.\d+\.\d+(\-\S+)?/g
+          );
+          if (match && match.length === 1) {
+            versionName = semver.clean(match[0]);
+          }
+        }
         return {
           date: new Date(parts[0]),
           commit: parts[1],
-          name: parts[2]
+          name: versionName
         };
       })
   )
   .then(
     allNewCommits => {
-      if (prerelease) {
+      if (channel === 'edge') {
         task.warn('This theme is configured in `theme.json` to be connected ' +
-                  'to the "prerelease" channel of its base theme. This means ' +
+                  'to the "edge" channel of its base theme. This means ' +
                   'that its build process will notify about any new commits ' +
                   'in the base theme, instead of just any new versions.');
         return allNewCommits;
       } else {
-        return gitFetchRemoteTags({ prerelease, logger: gopts.logger })
-          .then(
+        return gitFetchRemoteTags({
+          prerelease: channel === 'prerelease',
+          logger: gopts.logger
+        }).then(
             remoteTags => allNewCommits.filter(c =>
               remoteTags.some(t => t.commit === c.commit))
           )
@@ -102,7 +123,7 @@ let check = function(task, { dir }) {
           .map(t => 
                chalk.cyan(normalizeDateLength(t.date.toLocaleString(), 23)) + 
                `  ${chalk.bold.yellow(t.name)} (commit: ${t.commit.slice(0,9)})`);
-        if (prerelease) {
+        if (channel === 'edge') {
           task.warn(chalk.green.bold(`\nThis theme is ${newCommits.length} ` +
             `commits behind its base theme.`) +
               `\n\n##  Unmerged commits: \n\n` +
@@ -111,6 +132,12 @@ let check = function(task, { dir }) {
                                 `merge these commits.`));
 
         } else {
+          if (channel === 'prerelease') {
+            task.warn('This theme is configured in `theme.json` to be connected ' +
+                  'to the "prerelease" channel of its base theme. This means ' +
+                  'that its build process will notify about prerelease tags ' +
+                  'in the base theme, instead of just stable versions.');
+          }
         task.warn(
             chalk.green.bold('\nThere are new versions available! \n\n') + 
                  formattedCommits.join('\n') +
@@ -122,6 +149,8 @@ let check = function(task, { dir }) {
                  'configuration does not fetch tags from the base theme ' +
                  'repository, to avoid conflicts with your own tags.'));
       }
+    } else {
+      task.info(chalk.green('Your theme is up to date with its base theme.'));
     }
     task.done();
   }).catch(task.fail);
@@ -139,6 +168,7 @@ check._doc = {
   args: "<path>",
   description: "Check for new versions of the base theme..",
   options: {
+    'channelOverride': 'Release channel the theme is on. Can be "stable", "prerelease", or "edge".'
   }
 };
 

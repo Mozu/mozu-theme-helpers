@@ -37,14 +37,18 @@ export default function git(command, reason, options) {
       }
       proc.on('close', code => {
         if (code !== 0) {
-          reject(new Error(errput));
+          reject(new Error(
+            `Failed at task "${text}": ${errput}`
+          ));
         } else {
           if (!quiet) log(output);
           resolve(output);
         }
       });
     } catch(e) {
-      reject(e);
+      reject(new Error(
+        `Failed at task "${text}": ${e.message}`
+      ));
     }
   });
 }
