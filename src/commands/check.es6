@@ -61,7 +61,7 @@ let check = function(task, { dir, channelOverride }) {
   })
   .then(
     mergeBase => git(
-      `--no-pager log --date=iso-strict --pretty=%ad||||%H||||%s ` +
+      `--no-pager log --date=rfc --pretty=%ad||||%H||||%s ` +
       `${mergeBase.trim()}..basetheme/master`,
       `Getting all commits since most recent merge base`, gopts
     )
