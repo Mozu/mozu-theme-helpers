@@ -1,73 +1,90 @@
-# Theme Helper for Mozu and Associated Assets
+# mozu-theme-helpers
 !["thmaa" copyright john "derf" backderf, 1997](https://cloud.githubusercontent.com/assets/1643758/5307264/17d153f4-7bd1-11e4-8bbb-951ca191b903.jpg)
 
-Command-line toolbelt for common tasks involving Mozu themes.
+Library for common theme tasks: checking and maintaining repository relationship, and compiling JavaScript.
 
 ## Requires
  - nodejs 0.12 or above
 
 ## Install
 ```
-npm install thmaa
+npm install --save-dev mozu-theme-helpers
 ```
 
 ## API
-All command line options are also available via a Node API.
-```
-var thmaa = require('thmaa');
-thmaa('check', process.cwd(), callback).on('info', console.log);
-```
-
-
-## Install Command Line Utility
-```
-npm install -g thmaa
-```
-
-
-## Command Line Usage
-```
-
-                                                                                         
-  Theme Helper for Mozu and Associated Assets                                            
-                                                                                         
-                                                                                         
-  The <path> parameter defaults to the current directory.                                
-                                                                                         
-  check <path>                            Check for new versions of the base theme..
-
-  compile <path>                          Compile theme scripts, respecting 
-                                          inheritance.
-                                          
-    --ignore                              Speed up! Specify a pattern of files and 
-                                          directories to ignore when copying, 
-                                          relative to root. Defaults to ".git, 
-                                          node_modules"
-                                          
-    --dest                                Specify a destination other than the 
-                                          default /compiled/scripts directory of 
-                                          your theme.
-                                          
-    --verbose                             Talk a lot.
-
-                                          
-    --quiet                               Don't talk at all.
-
-
-  help                                    Print this very message
-                                          
-    --splash                              Display a fancy logo.
-
-                                          
-    --forcewidth <n>                      Force display at a certain number of 
-                                          columns. Defaults to terminal width.
-
-  update <path>                           Update base theme in references folder.
-                                          
-    --no-cache                            Skip the local cache. This results in a 
-                                          call out to the remote repository every 
-                                          time, instead of relying on cache.
-
-
+```js
+const mozuThemeHelpers = require('mozu-theme-helpers');
+const pathToTheme = "/Users/you/mozuThemes/someTheme";
+let task = mozuThemeHelpers('check', { dir: pathToTheme });
+// tasks are EventEmitters, emitting "info", "warn", "error", and "done" events
+task.on('info', console.log);
+task.on('warn', console.log);
+task.on('error' e => {
+  console.error(e);
+  process.exit(1);
+});
+task.on('done', summary => {
+  console.log(summary);
+  process.exit(0);
+});
 ```
 
+## Task Types
+
+### `check`
+
+Maintains base theme relationship in your `theme.json` and in Git, and informs you of available updates. This task is meant to be run on every incremental build of your theme.
+
+ - Detects the base theme of the current theme, by looking in Git and in `theme.json`
+ - Reattaches a `basetheme` remote if necessary.
+ - Checks the base theme for updates.
+ - Displays new available versions, or all new available commits, based on the `baseThemeChannel` setting in `theme.json`. If it's set to `stable`, displays only available stable versions. If it's set to `prerelease`, will also display prerelease versions. If it's set to `edge`, will display all commits that are available to merge.
+ - Updates the `baseThemeVersion` in `theme.json` if it detects that you have merged in later versions.
+
+Options:
+ - `dir` - The directory of the theme to check. Defaults to `process.cwd()`.
+
+### `compile`
+
+Compiles your theme JavaScript using the customized Mozu RequireJS Compiler.
+
+ - Puts built JS in the `compiled` directory.
+ - Minifies JS using Uglify2 by default.
+ - Detects `extends` in theme.json and uses a temp directory to simulate runtime resolution. **This feature is deprecated; you should have `"extends": null` in your `theme.json`.
+
+Options:
+ - `skipminification` - Skip the minification step. Use this during development for faster builds. Default `false`.
+
+## Grunt Task
+
+This library is mostly designed for use in Grunt, and so it has a grunt task.
+Grunt will recognize the `/tasks/` folder of any node module, so you can say:
+```js
+grunt.loadNpmTasks('mozu-theme-helpers');
+```
+This will give Grunt a `mozutheme` task, that can run `check` and `compile` with options.
+
+Example task configuration:
+```js
+mozutheme: {
+  check: {
+    command: 'check'
+  },
+  fullcompile: {
+    command: 'compile'
+  },
+  quickcompile: {
+    command: 'compile',
+    opts: {
+      skipminification: true
+    }
+  }
+}
+```
+
+Task configuration must include a `command` property that can be either `'check'` or `'compile'`. It can optionally include an `opts` object that will be sent to the task as options.
+
+`opts` can also be a function, that can asynchronously create options. It will receive the `grunt` process object and a `callback` as arguments, and should call `callback` with an error as the first argument if an error occurred, or `null` as the first argument and an options object to be sent to the task as the second argument.
+
+###License
+ISC. Copyright 2015 Volusion, LLC.
