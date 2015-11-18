@@ -20,7 +20,7 @@ module.exports = function(grunt) {
     }
     grunt.verbose.ok('Recognized command ' + target);
     if (typeof opts === "function") {
-      opts(run);
+      opts(grunt, run);
     } else {
       run(null, opts);
     }
