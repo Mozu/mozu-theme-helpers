@@ -1,5 +1,5 @@
+import chalk from 'chalk';
 import childProcess from 'child_process';
-import colors from 'colors';
 
 export default function git(command, reason, options) {
   let text;
@@ -14,7 +14,8 @@ export default function git(command, reason, options) {
   let log = options && options.logger || console.log;
   return new Promise((resolve, reject) => {
     try {
-      log(reason + ': \n      ' + ('git ' + text).yellow, {
+      log(
+        reason + ': \n      ' + chalk.yellow('git ' + text), {
         markdown: false
       });
       let opts = Object.assign({

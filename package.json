@@ -33,18 +33,8 @@
     "themes"
   ],
   "dependencies": {
-    "JSONStream": "^1.0.6",
-    "babel-runtime": "^6.1.4",
-    "colors": "^1.1.2",
-    "concat-stream": "^1.5.1",
-    "minimist": "^1.2.0",
-    "mkdirp": "^0.5.1",
-    "multipipe": "^0.2.1",
-    "request": "^2.65.0",
-    "rimraf": "^2.4.3",
+    "chalk": "^1.1.1",
     "semver": "^5.0.3",
-    "tar": "^2.2.1",
-    "tunnel-agent": "^0.4.1",
     "zubat": "^0.4.2"
   },
   "license": "MIT",
