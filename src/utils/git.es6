@@ -42,8 +42,9 @@ export default function git(command, reason, options) {
             `Failed at task "${text}": ${errput}`
           ));
         } else {
-          if (!quiet) log(output);
-          resolve(output);
+          let trimmedOutput = output.trim();
+          if (!quiet) log(trimmedOutput);
+          resolve(trimmedOutput);
         }
       });
     } catch(e) {
