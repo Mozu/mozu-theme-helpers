@@ -6,6 +6,14 @@ import metadataHandler from "../utils/metadata";
 import git from "../utils/git";
 import gitFetchRemoteTags from '../utils/git-fetch-remote-tags';
 
+function findWhere(coll, props) {
+  for (let i = 0; i < coll.length; i++) {
+    if (Object.keys(props).every(prop => coll[i][prop] === props[prop])) {
+      return coll[i];
+    }
+  }
+}
+
 let check = function(task, { dir, channelOverride }) {
 
   let themeDir = getThemeDir(dir);
@@ -26,6 +34,10 @@ let check = function(task, { dir, channelOverride }) {
   let channel = channelOverride || theme.about.baseThemeChannel;
   let fallbackCommit = theme.about.baseThemeVersion &&
     theme.about.baseThemeVersion.commit;
+
+  let updateBaseThemeVersionInThemeJson = false;
+
+  let remoteTags = [];
 
   git('remote show basetheme', 'Checking if base theme remote exists...',
     gopts)
@@ -55,16 +67,23 @@ let check = function(task, { dir, channelOverride }) {
     if (!fallbackCommit) {
       throw new Error('Could not find a merge base with the base theme ' +
                       'repository, or a baseThemeVersion specified in ' +
-                      'theme.json. Please check your `basetheme` remote.');
+                      'theme.json. Please check your `basetheme` remote, ' +
+                      'or the `baseTheme` and `baseThemeVersion` properties ' +
+                      'in your `theme.json` file.');
     }
     return fallbackCommit;
   })
   .then(
-    mergeBase => git(
-      `--no-pager log --date=rfc --pretty=%ad||||%H||||%s ` +
-      `${mergeBase.trim()}..basetheme/master`,
-      `Getting all commits since most recent merge base`, gopts
-    )
+    mergeBase => {
+      if (mergeBase !== fallbackCommit) {
+        updateBaseThemeVersionInThemeJson = mergeBase;
+      }
+      return git(
+        `--no-pager log --date=rfc --pretty=%ad||||%H||||%s ` +
+        `${mergeBase.trim()}..basetheme/master`,
+        `Getting all commits since most recent merge base`, gopts
+      );
+    }
   )
   .then(
     newCommitsRaw =>
@@ -106,13 +125,16 @@ let check = function(task, { dir, channelOverride }) {
           prerelease: channel === 'prerelease',
           logger: gopts.logger
         }).then(
-            remoteTags => allNewCommits.filter(c =>
-              remoteTags.some(t => t.commit === c.commit))
-          )
+          tags => {
+            remoteTags = tags;
+            return allNewCommits.filter(c =>
+              remoteTags.some(t => t.commit === c.commit)
+            )
+          }
+        )
       }
   })
-  .then(
-    newCommits =>  {
+  .then(newCommits => {
       let normalizeDateLength = (s, l) => {
         while (s.length < l) s += ' ';
         return s;
@@ -121,36 +143,85 @@ let check = function(task, { dir, channelOverride }) {
         let formattedCommits =
           newCommits
           .map(t => 
-               chalk.cyan(normalizeDateLength(t.date.toLocaleString(), 23)) + 
-               `  ${chalk.bold.yellow(t.name)} (commit: ${t.commit.slice(0,9)})`);
+             chalk.cyan(normalizeDateLength(t.date.toLocaleString(), 23)) + 
+           `  ${chalk.bold.yellow(t.name)} (commit: ${t.commit.slice(0,9)})`
+          );
         if (channel === 'edge') {
-          task.warn(chalk.green.bold(`\nThis theme is ${newCommits.length} ` +
-            `commits behind its base theme.`) +
-              `\n\n##  Unmerged commits: \n\n` +
-              formattedCommits.join('\n') +
-              chalk.green.bold(`\n\n Run \`git merge basetheme/master\` to ` +
-                                `merge these commits.`));
-
+          task.warn(
+            chalk.green.bold(
+              `This theme is ${newCommits.length} ` +
+              `commits behind its base theme.`
+            ) +
+            `\n\n## Unmerged commits:\n\n` +
+            formattedCommits.join('\n') +
+            chalk.green.bold(
+              `\n\n Run \`git merge basetheme/master\` to merge these commits.`
+            )
+          );
         } else {
           if (channel === 'prerelease') {
-            task.warn('This theme is configured in `theme.json` to be connected ' +
-                  'to the "prerelease" channel of its base theme. This means ' +
-                  'that its build process will notify about prerelease tags ' +
-                  'in the base theme, instead of just stable versions.');
+            task.warn(
+              'This theme is configured in `theme.json` to be connected ' +
+              'to the "prerelease" channel of its base theme. This means ' +
+              'that its build process will notify about prerelease tags ' +
+              'in the base theme, instead of just stable versions.'
+            );
           }
         task.warn(
-            chalk.green.bold('\nThere are new versions available! \n\n') + 
-                 formattedCommits.join('\n') +
-            '\n\nTo merge a new version, run `git merge <commit>`, where ' +
-            '<commit> is the commit ID corresponding to the version you ' +
-            'would like to begin to merge.\n');
+          chalk.green.bold('\nThere are new versions available! \n\n') + 
+          formattedCommits.join('\n') +
+          '\n\nTo merge a new version, run `git merge <commit>`, where ' +
+          '<commit> is the commit ID corresponding to the version you ' +
+          'would like to begin to merge.\n'
+        );
         task.warn(
-          chalk.gray('You cannot merge the tag directly, because the default ' +
-                 'configuration does not fetch tags from the base theme ' +
-                 'repository, to avoid conflicts with your own tags.'));
+          chalk.gray(
+            'You cannot merge the tag directly, because the default ' +
+            'configuration does not fetch tags from the base theme ' +
+            'repository, to avoid conflicts with your own tags.'
+          )
+        );
       }
     } else {
       task.info(chalk.green('Your theme is up to date with its base theme.'));
+    }
+    if (updateBaseThemeVersionInThemeJson) {
+      if (!fallbackCommit) {
+        task.warn(
+          'Saving detected merge base in theme.json as baseThemeVersion.'
+        );
+      } else {
+        task.warn(
+          'The detected *merge base* is your repository is different than ' +
+          'the baseThemeVersion detected in your theme.json. Updating ' +
+          'theme.json to reflect the repository state.'
+        );
+      }
+      let baseThemeVersion = {
+        commit: updateBaseThemeVersionInThemeJson,
+      };
+      if (channel === 'edge') {
+        baseThemeVersion.version = 'HEAD';
+      } else {
+        let foundBTV = findWhere(remoteTags, baseThemeVersion);
+        if (foundBTV) {
+          baseThemeVersion = foundBTV;
+        } else {
+          task.warn(
+            'Could not find the current merge base among tags. Assuming ' +
+            'a manual merge was done from a non-tag; please consider ' +
+            'changing the `baseThemeChannel` in theme.json to "edge".'
+          );
+        }
+      }
+      theme.about.baseThemeVersion = baseThemeVersion;
+      try {
+        metadataHandler.write(themeDir, 'theme', theme);
+      } catch(e) {
+        task.warn('Could not write new baseThemeVersion to theme.json. ' + e);
+      }
+      task.info('Successfully wrote new baseThemeVersion to theme.json: ' + 
+               JSON.stringify(baseThemeVersion));
     }
     task.done();
   }).catch(task.fail);
