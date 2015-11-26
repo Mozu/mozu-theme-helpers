@@ -44,7 +44,14 @@ let check = function(task, { dir, channelOverride }) {
   .catch(
     () => {
       if (!theme.about.baseTheme) {
-        throw new Error("No theme repo specified; cannot check for updates.");
+        task.fail(
+          'No theme repo specified; cannot check for updates.\n\nPlease ' +
+          'add a `baseTheme` property to the `about` section of your ' +
+          '`theme.json` file, whose value is the URL of a Git repository ' +
+          'containing the base theme of this theme. If this theme extends ' +
+          'the Mozu Core Theme, then the line should say:\n\n  "extends": ' +
+          '"https://github.com/mozu/core-theme"\n\n'
+        );
       } else {
         return git('remote add basetheme ' + theme.about.baseTheme,
           'Base theme specified in theme.json. Adding remote to ' +
