@@ -149,6 +149,7 @@ let check = function(task, { dir, channelOverride }) {
       if (newCommits.length > 0) {
         let formattedCommits =
           newCommits
+          .reverse()
           .map(t => 
              chalk.cyan(normalizeDateLength(t.date.toLocaleString(), 23)) + 
            `  ${chalk.bold.yellow(t.name)} (commit: ${t.commit.slice(0,9)})`
