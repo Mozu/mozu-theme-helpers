@@ -22,6 +22,8 @@ let compile = function(task, opts) {
 
   opts.ignore.push('/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$');
 
+  if (opts.verbose) opts.logLevel = 6;
+
   let job = compiler(themeDir, opts, err => {
     if (err) {
       task.fail(err);

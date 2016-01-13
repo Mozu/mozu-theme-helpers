@@ -29,6 +29,9 @@ module.exports = function(grunt) {
         grunt.fail.warn(err);
         return false;
       }
+      if (grunt.option('verbose')) {
+        opts.verbose = true;
+      }
       let helper = runHelper(target, opts);
       helper.on('info', x => grunt.log.oklns(x));
       helper.on('warn', x => grunt.log.writelns(x));
