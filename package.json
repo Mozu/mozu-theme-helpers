@@ -24,9 +24,6 @@
     ]
   },
   "main": "./lib/index.js",
-  "bugs": {
-    "url": "https://github.com/mozu/mozu-theme-helpers/issues"
-  },
   "keywords": [
     "mozu",
     "hypr",
