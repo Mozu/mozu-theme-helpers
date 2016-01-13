@@ -1,17 +1,21 @@
 {
   "name": "mozu-theme-helpers",
+  "description": "Helpers for compiling the JavaScript of Mozu themes and keeping Mozu themes up to date.",
   "version": "1.3.0",
-  "author": "Volusion Inc.",
-  "contributors": [
-    {
-      "name": "James Zetlen",
-      "email": "james_zetlen@volusion.com"
-    }
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mozu/mozu-theme-helpers"
+  },
+  "author": "Volusion, LLC",
   "scripts": {
+    "ci-build": "npm run babel",
+    "ci-build-stable": "npm run ci-build",
+    "postci-build-stable": "mozu-validate-npm-package",
+    "test": "echo No tests specified",
+    "cov": "echo No coverage tools specified",
     "babel": "babel src -d lib",
     "watch": "npm run babel -- -w",
-    "preversion": "npm run babel",
+    "preversion": "npm run ci-build-stable",
     "version": "git add -A lib"
   },
   "babel": {
@@ -20,10 +24,6 @@
     ]
   },
   "main": "./lib/index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mozu/mozu-theme-helpers"
-  },
   "bugs": {
     "url": "https://github.com/mozu/mozu-theme-helpers/issues"
   },
@@ -43,6 +43,7 @@
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.1.4",
-    "babel-preset-es2015": "^6.1.4"
+    "babel-preset-es2015": "^6.1.4",
+    "mozu-validate-npm-package": "^1.0.3"
   }
 }
