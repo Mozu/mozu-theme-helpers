@@ -1,5 +1,4 @@
 # mozu-theme-helpers
-!["thmaa" copyright john "derf" backderf, 1997](https://cloud.githubusercontent.com/assets/1643758/5307264/17d153f4-7bd1-11e4-8bbb-951ca191b903.jpg)
 
 Library for common theme tasks: checking and maintaining repository relationship, and compiling JavaScript.
 
@@ -50,10 +49,11 @@ Compiles your theme JavaScript using the customized Mozu RequireJS Compiler.
 
  - Puts built JS in the `compiled` directory.
  - Minifies JS using Uglify2 by default.
- - Detects `extends` in theme.json and uses a temp directory to simulate runtime resolution. **This feature is deprecated; you should have `"extends": null` in your `theme.json`.
+ - Detects `extends` in theme.json and uses a temp directory to simulate runtime resolution. **This feature is deprecated; you should have `"extends": null` in your `theme.json`.**
 
 Options:
  - `skipminification` - Skip the minification step. Use this during development for faster builds. Default `false`.
+ - `verbose` - Say a lot more stuff.
 
 ## Grunt Task
 
@@ -86,5 +86,5 @@ Task configuration must include a `command` property that can be either `'check'
 
 `opts` can also be a function, that can asynchronously create options. It will receive the `grunt` process object and a `callback` as arguments, and should call `callback` with an error as the first argument if an error occurred, or `null` as the first argument and an options object to be sent to the task as the second argument.
 
-###License
-ISC. Copyright 2015 Volusion, LLC.
+### License
+MIT. Copyright 2016 Volusion, LLC.
