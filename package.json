@@ -9,7 +9,7 @@
     }
   ],
   "scripts": {
-    "babel": "babel -x .es6 src -d lib",
+    "babel": "babel src -d lib",
     "watch": "npm run babel -- -w",
     "preversion": "npm run babel",
     "version": "git add -A lib"
