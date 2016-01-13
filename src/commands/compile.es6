@@ -1,6 +1,6 @@
 'use strict';
 import path from "path";
-import zubat from "zubat";
+import compiler from "../utils/compiler";
 import chalk from "chalk";
 import slug from "../utils/slug";
 import getThemeDir from "../utils/get-theme-dir";
@@ -22,7 +22,7 @@ let compile = function(task, opts) {
 
   opts.ignore.push('/references','\\.git','node_modules','^/resources','^/tasks','\\.zip$');
 
-  let job = zubat(themeDir, opts, err => {
+  let job = compiler(themeDir, opts, err => {
     if (err) {
       task.fail(err);
     } else {
@@ -34,13 +34,13 @@ let compile = function(task, opts) {
   job.on('log', function(str, sev) {
     switch(sev) {
       case "error":
-        job.cleanup(() => task.fail(`Zubat fainted. ${str}`));
+        job.cleanup(() => task.fail(`Compiler failed: ${str}`));
         break;
       case "warning":
-        job.cleanup(() => task.fail(`zubat: ${str}`));
+        job.cleanup(() => task.fail(`Compiler warning: ${str}`));
         break;
       default:
-        task.info(`zubat: ${str}`);
+        task.info(`Compiler output: ${str}`);
     }
   });
 
