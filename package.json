@@ -1,7 +1,7 @@
 {
   "name": "mozu-theme-helpers",
   "description": "Helpers for compiling the JavaScript of Mozu themes and keeping Mozu themes up to date.",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Mozu/mozu-theme-helpers"
